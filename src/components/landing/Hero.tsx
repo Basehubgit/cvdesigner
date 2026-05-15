@@ -219,41 +219,6 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Floating AI badge */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1, duration: 0.4 }}
-                className="absolute -top-4 -right-4 glass-card rounded-2xl p-3 shadow-xl border border-purple-500/20"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-white">AI Enhanced</p>
-                    <p className="text-xs text-[#94A3B8]">98% ATS Score</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Floating stats badge */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.2, duration: 0.4 }}
-                className="absolute -bottom-4 -left-4 glass-card rounded-2xl p-3 shadow-xl border border-white/10"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-white">Interview Ready</p>
-                    <p className="text-xs text-[#94A3B8]">Generated in 2 min</p>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
         </div>
