@@ -12,7 +12,12 @@ function generateRandomString(length = 12): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { packageId, price } = await req.json() as { packageId: string; price: number; credits: number };
+  const { packageId, price, user } = await req.json() as {
+    packageId: string;
+    price: number;
+    credits: number;
+    user?: { id: string; name: string; email: string } | null;
+  };
 
   const pkg = PACKAGES[packageId];
   if (!pkg) {
@@ -47,32 +52,32 @@ export async function POST(req: NextRequest) {
     callbackUrl,
     enabledInstallments: [1, 2, 3, 6, 9],
     buyer: {
-      id: "user_001",
-      name: "CVDesignerAI",
-      surname: "User",
+      id: user?.id ?? "guest",
+      name: user?.name?.split(" ")[0] ?? "Guest",
+      surname: user?.name?.split(" ").slice(1).join(" ") || "User",
       gsmNumber: "+905350000000",
-      email: "user@cvdesignerai.com",
+      email: user?.email ?? "guest@cvdesigner.pro",
       identityNumber: "74300864791",
       lastLoginDate: new Date().toISOString().replace("T", " ").slice(0, 19),
       registrationDate: "2024-01-01 00:00:00",
-      registrationAddress: "İstanbul, Türkiye",
-      ip: "85.34.78.112",
+      registrationAddress: "Istanbul, Turkey",
+      ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "85.34.78.112",
       city: "Istanbul",
       country: "Turkey",
       zipCode: "34000",
     },
     shippingAddress: {
-      contactName: "CVDesignerAI User",
+      contactName: user?.name ?? "Guest User",
       city: "Istanbul",
       country: "Turkey",
-      address: "Dijital Ürün",
+      address: "Digital Product",
       zipCode: "34000",
     },
     billingAddress: {
-      contactName: "CVDesignerAI User",
+      contactName: user?.name ?? "Guest User",
       city: "Istanbul",
       country: "Turkey",
-      address: "Dijital Ürün",
+      address: "Digital Product",
       zipCode: "34000",
     },
     basketItems: [

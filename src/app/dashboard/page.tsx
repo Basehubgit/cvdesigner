@@ -32,7 +32,7 @@ export default function DashboardPage() {
     { label: "Resumes Created", value: String(resumes.length),        icon: FileText,   color: "text-purple-400" },
     { label: "AI Credits Left", value: String(credits),               icon: Sparkles,   color: "text-emerald-400" },
     { label: "Avg ATS Score",   value: resumes.length ? `${avgAts}%` : "—", icon: TrendingUp, color: "text-amber-400" },
-    { label: "Templates",       value: "8",                           icon: Zap,        color: "text-blue-400" },
+    { label: "Templates",       value: "8",                            icon: Zap,        color: "text-blue-400" },
   ];
 
   const addToast = (message: string, type: Toast["type"] = "success") => {
@@ -292,43 +292,77 @@ export default function DashboardPage() {
 
               {/* Resume preview */}
               <div className="p-6 max-h-[70vh] overflow-y-auto">
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden text-xs" style={{ fontFamily: "Georgia, serif" }}>
-                  <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5 text-white">
-                    <h2 className="text-base font-bold">Alexandra Chen</h2>
-                    <p className="text-purple-300 text-xs mt-0.5">{previewResume.title}</p>
-                    <div className="flex flex-wrap gap-x-3 mt-2 text-[10px] text-slate-400">
-                      <span>alex.chen@email.com</span>
-                      <span>•</span><span>+1 (555) 000-0000</span>
-                      <span>•</span><span>San Francisco, CA</span>
-                    </div>
-                  </div>
-                  <div className="px-6 py-4 space-y-4">
-                    <div>
-                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1.5">Summary</h3>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">Innovative product designer with 6+ years crafting user-centered experiences for Fortune 500 companies. Proven track record of increasing user engagement by 40% and reducing support tickets by 28%.</p>
-                    </div>
-                    <div>
-                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-2">Experience</h3>
-                      <div className="space-y-2.5">
-                        <div>
-                          <div className="flex justify-between">
-                            <div><p className="text-[11px] font-bold text-slate-800">Senior Product Designer</p><p className="text-[10px] text-purple-700">Stripe</p></div>
-                            <span className="text-[10px] text-slate-400">2022 — Present</span>
-                          </div>
-                          <p className="text-[10px] text-slate-600 mt-0.5">Led end-to-end design for payment dashboard serving 4M+ merchants, resulting in 28% reduction in support tickets.</p>
+                {(() => {
+                  const fd = previewResume.formData as Record<string, unknown>;
+                  const name = fd?.name as string || previewResume.title;
+                  const email = fd?.email as string;
+                  const phone = fd?.phone as string;
+                  const location = fd?.location as string;
+                  const summary = fd?.summary as string;
+                  const skills = (fd?.skills as string[]) ?? [];
+                  const experience = (fd?.experience as {role:string;company:string;period:string;description:string}[]) ?? [];
+                  const education = (fd?.education as {degree:string;institution:string;year:string}[]) ?? [];
+                  return (
+                    <div className="bg-white rounded-lg shadow-lg overflow-hidden text-xs" style={{ fontFamily: "Georgia, serif" }}>
+                      <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5 text-white">
+                        <h2 className="text-base font-bold">{name || "—"}</h2>
+                        <div className="flex flex-wrap gap-x-3 mt-2 text-[10px] text-slate-400">
+                          {email && <span>{email}</span>}
+                          {phone && <><span>•</span><span>{phone}</span></>}
+                          {location && <><span>•</span><span>{location}</span></>}
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1.5">Skills</h3>
-                      <div className="flex flex-wrap gap-1">
-                        {["Figma", "Design Systems", "User Research", "Prototyping", "React"].map((s) => (
-                          <span key={s} className="bg-purple-50 text-purple-700 text-[10px] px-2 py-0.5 rounded font-medium">{s}</span>
-                        ))}
+                      <div className="px-6 py-4 space-y-4">
+                        {summary && (
+                          <div>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1.5">Summary</h3>
+                            <p className="text-[11px] text-slate-600 leading-relaxed">{summary}</p>
+                          </div>
+                        )}
+                        {experience.length > 0 && (
+                          <div>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-2">Experience</h3>
+                            <div className="space-y-2.5">
+                              {experience.slice(0, 3).map((exp, i) => (
+                                <div key={i}>
+                                  <div className="flex justify-between">
+                                    <div><p className="text-[11px] font-bold text-slate-800">{exp.role}</p><p className="text-[10px] text-purple-700">{exp.company}</p></div>
+                                    <span className="text-[10px] text-slate-400">{exp.period}</span>
+                                  </div>
+                                  {exp.description && <p className="text-[10px] text-slate-600 mt-0.5 line-clamp-2">{exp.description}</p>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {education.length > 0 && (
+                          <div>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1.5">Education</h3>
+                            {education.slice(0, 2).map((edu, i) => (
+                              <div key={i} className="flex justify-between">
+                                <div><p className="text-[11px] font-bold text-slate-800">{edu.degree}</p><p className="text-[10px] text-purple-700">{edu.institution}</p></div>
+                                <span className="text-[10px] text-slate-400">{edu.year}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {skills.length > 0 && (
+                          <div>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-700 mb-1.5">Skills</h3>
+                            <div className="flex flex-wrap gap-1">
+                              {skills.slice(0, 8).map((s) => (
+                                <span key={s} className="bg-purple-50 text-purple-700 text-[10px] px-2 py-0.5 rounded font-medium">{s}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {!summary && experience.length === 0 && skills.length === 0 && (
+                          <p className="text-[11px] text-slate-400 text-center py-4">No content yet — open the builder to start filling in your resume.</p>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
 
               <div className="px-5 py-4 border-t border-white/5 flex gap-2">

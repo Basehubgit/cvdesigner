@@ -30,7 +30,14 @@ export default function SettingsPage() {
   const [headline, setHeadline]   = useState(user?.headline ?? "");
   const [location, setLocation]   = useState(user?.location ?? "");
   const [passwords, setPasswords] = useState({ current: "", newPw: "", confirm: "" });
-  const [notifications, setNotifications] = useState({ resumeTips: true, weeklyDigest: false, productUpdates: true, marketingEmails: false });
+  type NotifState = { resumeTips: boolean; weeklyDigest: boolean; productUpdates: boolean; marketingEmails: boolean };
+  const [notifications, setNotifications] = useState<NotifState>(() => {
+    if (typeof window !== "undefined" && user?.id) {
+      const stored = localStorage.getItem(`notifications_${user.id}`);
+      if (stored) return JSON.parse(stored) as NotifState;
+    }
+    return { resumeTips: true, weeklyDigest: false, productUpdates: true, marketingEmails: false };
+  });
 
   const handleSaveProfile = async () => {
     await updateProfile({ name, headline, location });
@@ -51,9 +58,23 @@ export default function SettingsPage() {
     setTimeout(() => setPwSuccess(false), 3000);
   };
 
+  const handleSaveNotifications = async () => {
+    if (!user) return;
+    localStorage.setItem(`notifications_${user.id}`, JSON.stringify(notifications));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   const handleDeleteAccount = async () => {
     if (!user) return;
-    if (!confirm("Are you sure? This will permanently delete your account and all resumes.")) return;
+    if (!confirm("Are you sure? This will permanently delete your account and all resumes. This cannot be undone.")) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+    } catch { /* ignore */ }
     await logout();
   };
 
@@ -184,7 +205,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
                   ))}
-                  <button onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }} className="flex items-center gap-2 btn-primary text-white font-semibold px-5 py-2.5 rounded-xl text-sm mt-4">
+                  <button onClick={handleSaveNotifications} className="flex items-center gap-2 btn-primary text-white font-semibold px-5 py-2.5 rounded-xl text-sm mt-4">
                     {saved ? <><Check className="w-4 h-4" /> Saved!</> : <><Save className="w-4 h-4" /> Save Preferences</>}
                   </button>
                 </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Eye, Star, Zap, Check } from "lucide-react";
+import { Eye, Star, Zap, Check, X } from "lucide-react";
 import { useResumes } from "@/context/ResumesContext";
 
 const categories = ["All", "Professional", "Creative", "Minimal", "Executive"];
@@ -25,9 +25,10 @@ export default function TemplatesPage() {
   const { createResume } = useResumes();
   const [activeCategory, setActiveCategory] = useState("All");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<typeof templates[0] | null>(null);
 
-  const handleUseTemplate = (templateId: string) => {
-    const id = createResume(templateId);
+  const handleUseTemplate = async (templateId: string) => {
+    const id = await createResume(templateId);
     router.push(`/builder/${id}`);
   };
 
@@ -113,7 +114,10 @@ export default function TemplatesPage() {
                       animate={{ opacity: 1 }}
                       className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2"
                     >
-                      <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs font-medium transition-all">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setPreviewTemplate(template); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs font-medium transition-all"
+                      >
                         <Eye className="w-3.5 h-3.5" /> Preview
                       </button>
                       <button
@@ -139,6 +143,59 @@ export default function TemplatesPage() {
           </div>
         </div>
       </main>
+
+      {/* Template Preview Modal */}
+      <AnimatePresence>
+        {previewTemplate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={() => setPreviewTemplate(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-[#0D0D1A] rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+                <div>
+                  <p className="text-sm font-semibold text-white">{previewTemplate.name}</p>
+                  <p className="text-xs text-[#64748B]">{previewTemplate.category} · {previewTemplate.free ? "Free" : "Pro"}</p>
+                </div>
+                <button onClick={() => setPreviewTemplate(null)} className="p-1.5 rounded-lg text-[#64748B] hover:text-white hover:bg-white/5 transition-all">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="bg-white rounded-lg overflow-hidden shadow-lg text-xs" style={{ fontFamily: "Georgia, serif" }}>
+                  <div className={`w-full px-6 py-5 bg-gradient-to-r ${previewTemplate.accent} text-white`}>
+                    <p className="text-sm font-bold">Your Name</p>
+                    <p className="text-xs mt-0.5 opacity-80">Professional Title</p>
+                    <p className="text-[10px] mt-1.5 opacity-60">email@example.com • +1 555 000 0000 • City, Country</p>
+                  </div>
+                  <div className="px-6 py-4 space-y-3">
+                    <div><p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: previewTemplate.color }}>Summary</p><div className="space-y-1">{[...Array(2)].map((_,i) => <div key={i} className="h-1.5 rounded bg-slate-100" style={{ width: `${90 - i*15}%` }} />)}</div></div>
+                    <div><p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: previewTemplate.color }}>Experience</p><div className="space-y-1">{[...Array(4)].map((_,i) => <div key={i} className="h-1.5 rounded bg-slate-100" style={{ width: `${85 - i*10}%` }} />)}</div></div>
+                    <div><p className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: previewTemplate.color }}>Skills</p><div className="flex gap-1 flex-wrap">{[...Array(5)].map((_,i) => <div key={i} className="h-4 w-12 rounded" style={{ background: previewTemplate.color + "33" }} />)}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 pb-5">
+                <button
+                  onClick={() => { handleUseTemplate(previewTemplate.id); setPreviewTemplate(null); }}
+                  className="w-full btn-primary text-white font-semibold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
+                >
+                  <Check className="w-4 h-4" /> Use This Template
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

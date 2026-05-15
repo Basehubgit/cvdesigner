@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { X, Zap, Check, Sparkles, ShieldCheck, CreditCard, Loader2 } from "lucide-react";
 import { useCredits } from "@/context/CreditsContext";
+import { useAuth } from "@/context/AuthContext";
 
 const packages = [
   {
@@ -11,7 +12,7 @@ const packages = [
     credits: 1,
     price: 1.49,
     pricePerCredit: "1.49",
-    label: "Başlangıç",
+    label: "Starter",
     badge: null,
     savings: null,
     color: "border-white/10",
@@ -22,9 +23,9 @@ const packages = [
     credits: 5,
     price: 5.99,
     pricePerCredit: "1.20",
-    label: "Popüler",
-    badge: "En Çok Tercih",
-    savings: "%20 indirim",
+    label: "Popular",
+    badge: "Most Popular",
+    savings: "20% off",
     color: "border-purple-500/50",
     highlight: true,
   },
@@ -33,9 +34,9 @@ const packages = [
     credits: 15,
     price: 14.99,
     pricePerCredit: "1.00",
-    label: "En Avantajlı",
-    badge: "%33 Tasarruf",
-    savings: "%33 indirim",
+    label: "Best Value",
+    badge: "33% Savings",
+    savings: "33% off",
     color: "border-emerald-500/30",
     highlight: false,
   },
@@ -43,6 +44,7 @@ const packages = [
 
 export default function PurchaseModal() {
   const { isPurchaseOpen: purchaseOpen, closePurchase } = useCredits();
+  const { user } = useAuth();
   const [selected, setSelected] = useState("5cv");
   const [loading, setLoading] = useState(false);
   const [iyzipayForm, setIyzipayForm] = useState<string | null>(null);
@@ -61,6 +63,7 @@ export default function PurchaseModal() {
           packageId: selected,
           credits: selectedPkg.credits,
           price: selectedPkg.price,
+          user: user ? { id: user.id, name: user.name, email: user.email } : null,
         }),
       });
       const data = await res.json();
@@ -83,7 +86,7 @@ export default function PurchaseModal() {
         }
       }, 100);
     } catch (err) {
-      setError((err as Error).message);
+      setError((err as Error).message.replace("Ödeme başlatılamadı", "Payment could not be initiated"));
     } finally {
       setLoading(false);
     }

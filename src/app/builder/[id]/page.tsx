@@ -571,10 +571,17 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
             <span className="text-xs font-medium text-white">Live Preview</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-green-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-              ATS: 94%
-            </span>
+            {(() => {
+              const score = calcAtsScore(formData as Record<string, unknown>);
+              const color = score >= 70 ? "text-green-400" : score >= 40 ? "text-amber-400" : "text-red-400";
+              const dot   = score >= 70 ? "bg-green-400"  : score >= 40 ? "bg-amber-400"  : "bg-red-400";
+              return (
+                <span className={`text-xs ${color} flex items-center gap-1`}>
+                  <span className={`w-1.5 h-1.5 ${dot} rounded-full`} />
+                  ATS: {score}%
+                </span>
+              );
+            })()}
             <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 btn-primary rounded-lg text-xs font-medium text-white">
               <Download className="w-3 h-3" />
               PDF

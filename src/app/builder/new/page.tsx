@@ -8,6 +8,7 @@ import {
   Wand2, AlertCircle, Zap, ClipboardPaste,
 } from "lucide-react";
 import { useResumes } from "@/context/ResumesContext";
+import { useCredits } from "@/context/CreditsContext";
 
 const startOptions = [
   { id: "ai",      icon: Sparkles,       title: "Start with AI",         description: "Answer a few questions and let AI build your resume instantly.",              tag: "Fastest",     tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",   color: "border-purple-500/30 hover:border-purple-500/60",   iconBg: "bg-purple-600" },
@@ -22,10 +23,12 @@ type Step = "select" | "ai-questions" | "upload-paste" | "improve-upload" | "pas
 export default function NewResumePage() {
   const router = useRouter();
   const { createResume, saveResume } = useResumes();
+  const { deductCredit } = useCredits();
   const [selected, setSelected] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("select");
-  const [jobTitle, setJobTitle] = useState("");
+  const [jobTitle, setJobTitle]   = useState("");
   const [experience, setExperience] = useState("");
+  const [skills, setSkills]       = useState("");
   const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("Creating...");
@@ -63,9 +66,22 @@ export default function NewResumePage() {
 
     if (selected === "ai" && step === "select") { setStep("ai-questions"); return; }
     if (selected === "ai" && step === "ai-questions") {
+      if (!(await deductCredit())) return;
       setLoading(true);
-      setLoadingMsg("Creating...");
-      await goToBuilder();
+      setLoadingMsg("AI is generating your resume...");
+      try {
+        const res = await fetch("/api/ai/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobTitle, experience, skills }),
+        });
+        if (!res.ok) throw new Error("Generate failed");
+        const formData = await res.json();
+        await goToBuilder(formData);
+      } catch {
+        setLoading(false);
+        setError("AI generation failed. Please try again.");
+      }
       return;
     }
 
@@ -79,6 +95,7 @@ export default function NewResumePage() {
       return;
     }
 
+    if (!(await deductCredit())) return;
     setLoading(true);
     const endpoint = selected === "improve" ? "/api/ai/improve" : "/api/ai/parse";
     setLoadingMsg(selected === "improve" ? "AI is boosting your resume..." : "AI Parsing...");
@@ -242,7 +259,7 @@ export default function NewResumePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Key skills (comma separated)</label>
-                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." />
+                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." value={skills} onChange={(e) => setSkills(e.target.value)} />
               </div>
             </motion.div>
           )}
