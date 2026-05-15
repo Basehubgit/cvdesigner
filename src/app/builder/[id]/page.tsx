@@ -323,9 +323,6 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                     <FieldGroup label="Full Name">
                       <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" value={formData.name} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} />
                     </FieldGroup>
-                    <FieldGroup label="Job Title">
-                      <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" value={formData.title} onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))} />
-                    </FieldGroup>
                     <FieldGroup label="Email">
                       <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" value={formData.email} onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))} />
                     </FieldGroup>
@@ -590,7 +587,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
             {/* Header — changes with template */}
             <div className={`bg-gradient-to-r ${template.headerBg} px-6 py-6 text-white`}>
               <h2 className="text-lg font-bold">{formData.name || "Your Name"}</h2>
-              <p className={`${template.accentText} text-xs mt-0.5`}>{formData.title || "Job Title"}</p>
+              {formData.title && <p className={`${template.accentText} text-xs mt-0.5`}>{formData.title}</p>}
               <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-[10px] text-slate-300">
                 {formData.email && <span>{formData.email}</span>}
                 {formData.phone && <><span>•</span><span>{formData.phone}</span></>}
