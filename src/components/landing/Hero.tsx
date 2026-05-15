@@ -166,40 +166,44 @@ export default function Hero() {
               <div className="absolute inset-0 bg-purple-600/20 blur-3xl rounded-3xl transform scale-95" />
 
               {/* Resume card */}
-              <div className="relative bg-white rounded-2xl resume-shadow overflow-hidden" style={{ fontFamily: "Georgia, serif" }}>
-                {/* Resume Header */}
-                <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-7 text-white">
+              <div className="relative bg-white rounded-2xl resume-shadow overflow-hidden" style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}>
+                {/* Header — matches Modern template */}
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-7 text-white">
                   <h2 className="text-2xl font-bold tracking-tight">{resumePreview.name}</h2>
-                  <p className="text-purple-300 text-sm mt-1 font-light">{resumePreview.title}</p>
-                  <div className="flex gap-4 mt-3 text-xs text-slate-400">
+                  <p className="text-purple-400 text-sm mt-1 font-medium tracking-wide">{resumePreview.title}</p>
+                  <div className="flex items-center gap-3 mt-3 text-[11px] text-slate-400">
                     <span>{resumePreview.email}</span>
-                    <span>•</span>
+                    <span className="opacity-40">•</span>
                     <span>{resumePreview.location}</span>
                   </div>
                 </div>
 
-                {/* Resume Body */}
-                <div className="px-8 py-6 bg-white">
+                {/* Body */}
+                <div className="px-8 py-6 bg-white space-y-5">
                   {/* Summary */}
-                  <div className="mb-5">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Professional Summary</h3>
-                    <p className="text-slate-700 text-xs leading-relaxed">{resumePreview.summary}</p>
+                  <div>
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest pb-1.5 mb-2 border-b border-slate-100" style={{ color: "#7C3AED" }}>
+                      Professional Summary
+                    </h3>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">{resumePreview.summary}</p>
                   </div>
 
                   {/* Experience */}
-                  <div className="mb-5">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Experience</h3>
-                    <div className="space-y-4">
+                  <div>
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest pb-1.5 mb-3 border-b border-slate-100" style={{ color: "#7C3AED" }}>
+                      Experience
+                    </h3>
+                    <div className="space-y-3.5">
                       {resumePreview.experience.map((exp, i) => (
-                        <div key={i}>
+                        <div key={i} className="pl-3" style={{ borderLeft: "2px solid #7C3AED44" }}>
                           <div className="flex justify-between items-start">
                             <div>
-                              <p className="text-sm font-bold text-slate-800">{exp.role}</p>
-                              <p className="text-xs text-purple-700 font-medium">{exp.company}</p>
+                              <p className="text-[12px] font-bold text-slate-800">{exp.role}</p>
+                              <p className="text-[11px] font-semibold" style={{ color: "#7C3AED" }}>{exp.company}</p>
                             </div>
-                            <span className="text-xs text-slate-400">{exp.period}</span>
+                            <span className="text-[10px] text-slate-400 shrink-0 ml-2">{exp.period}</span>
                           </div>
-                          <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">{exp.desc}</p>
+                          <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{exp.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -207,10 +211,12 @@ export default function Hero() {
 
                   {/* Skills */}
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Skills</h3>
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest pb-1.5 mb-2 border-b border-slate-100" style={{ color: "#7C3AED" }}>
+                      Skills
+                    </h3>
                     <div className="flex flex-wrap gap-1.5">
                       {resumePreview.skills.map((skill) => (
-                        <span key={skill} className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md font-medium">
+                        <span key={skill} className="text-[11px] px-2.5 py-0.5 rounded-md font-medium" style={{ background: "#7C3AED22", color: "#6D28D9" }}>
                           {skill}
                         </span>
                       ))}
