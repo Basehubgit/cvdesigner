@@ -113,7 +113,7 @@ export default function Hero() {
                 className="btn-primary inline-flex items-center justify-center gap-2.5 text-white font-semibold px-8 py-4 rounded-xl text-base group"
               >
                 <Sparkles className="w-4 h-4" />
-                Create Resume — Free
+                Create Resume
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <button

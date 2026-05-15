@@ -71,7 +71,7 @@ export default function Navigation() {
               className="btn-primary text-sm font-medium text-white px-5 py-2 rounded-lg flex items-center gap-2"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Get Started Free
+              Get Started
             </Link>
           </div>
 
@@ -116,7 +116,7 @@ export default function Navigation() {
                   href="/auth/signup"
                   className="block btn-primary text-sm font-medium text-white px-4 py-3 rounded-lg text-center"
                 >
-                  Get Started Free
+                  Get Started
                 </Link>
               </div>
             </div>
