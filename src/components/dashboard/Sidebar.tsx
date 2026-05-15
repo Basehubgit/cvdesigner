@@ -15,7 +15,6 @@ const navItems = [
   { icon: BarChart3,     label: "Dashboard",    href: "/dashboard" },
   { icon: FileText,      label: "My Resumes",   href: "/dashboard/resumes" },
   { icon: LayoutTemplate,label: "Templates",    href: "/dashboard/templates" },
-  { icon: Sparkles,      label: "AI Assistant", href: "/dashboard/ai" },
   { icon: CreditCard,    label: "Billing",      href: "/dashboard/billing" },
   { icon: Settings,      label: "Settings",     href: "/dashboard/settings" },
 ];

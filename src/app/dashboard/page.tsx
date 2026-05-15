@@ -7,18 +7,13 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/dashboard/Sidebar";
 import {
   Plus, FileText, Sparkles, TrendingUp, Eye, Download,
-  MoreHorizontal, Clock, Star, Zap, ArrowRight, Target,
+  MoreHorizontal, Clock, Zap, ArrowRight,
   X, Copy, Trash2, Edit3, Check,
 } from "lucide-react";
 import { useResumes, type Resume as ResumeData } from "@/context/ResumesContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCredits } from "@/context/CreditsContext";
 
-const aiSuggestions = [
-  { icon: Target,    title: "Optimize for Google",    description: "Paste the job description to match keywords",    action: "Optimize", color: "text-blue-400",   bg: "bg-blue-500/10",   href: "/dashboard/ai" },
-  { icon: TrendingUp,title: "Improve bullet points",  description: "3 weak bullet points detected in your resume",   action: "Improve",  color: "text-purple-400", bg: "bg-purple-500/10", href: "/dashboard/ai" },
-  { icon: Star,      title: "Add missing sections",   description: "Add a Summary section to boost your ATS score",  action: "Add",      color: "text-amber-400",  bg: "bg-amber-500/10",  href: "/dashboard/ai" },
-];
 
 type Toast = { id: number; message: string; type?: "success" | "info" };
 
@@ -241,55 +236,18 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* AI Suggestions */}
+            {/* Credits */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <h2 className="text-base font-semibold text-white">AI Suggestions</h2>
-              </div>
-
-              <div className="space-y-3">
-                {aiSuggestions.map((suggestion, i) => {
-                  const Icon = suggestion.icon;
-                  return (
-                    <motion.div
-                      key={suggestion.title}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.08 }}
-                      className="glass-card rounded-xl p-4 hover:border-purple-500/20 transition-all"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg ${suggestion.bg} flex items-center justify-center shrink-0 mt-0.5`}>
-                          <Icon className={`w-4 h-4 ${suggestion.color}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white mb-0.5">{suggestion.title}</p>
-                          <p className="text-xs text-[#64748B] leading-relaxed">{suggestion.description}</p>
-                        </div>
-                      </div>
-                      <Link
-                        href={suggestion.href}
-                        className={`mt-3 text-xs font-medium ${suggestion.color} flex items-center gap-1 hover:gap-1.5 transition-all`}
-                      >
-                        {suggestion.action}
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-
-                <div className="pricing-popular rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-purple-300" />
-                    <span className="text-sm font-semibold text-white">Need more credits?</span>
-                  </div>
-                  <p className="text-xs text-[#94A3B8] mb-3">Buy CV credits — no subscription, credits never expire.</p>
-                  <Link href="/dashboard/billing" className="btn-primary text-xs font-semibold text-white px-4 py-2 rounded-lg flex items-center gap-1.5 w-full justify-center">
-                    <Zap className="w-3 h-3" />
-                    Buy Credits
-                  </Link>
+              <div className="pricing-popular rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-purple-300" />
+                  <span className="text-sm font-semibold text-white">Need more credits?</span>
                 </div>
+                <p className="text-xs text-[#94A3B8] mb-3">Buy CV credits — no subscription, credits never expire.</p>
+                <Link href="/dashboard/billing" className="btn-primary text-xs font-semibold text-white px-4 py-2 rounded-lg flex items-center gap-1.5 w-full justify-center">
+                  <Zap className="w-3 h-3" />
+                  Buy Credits
+                </Link>
               </div>
             </div>
           </div>
