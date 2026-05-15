@@ -4,19 +4,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Sparkles, FileText, Link2, Upload, ArrowRight, ChevronLeft,
-  Wand2, AlertCircle, CheckCircle,
+  Sparkles, FileText, Upload, ArrowRight, ChevronLeft,
+  Wand2, AlertCircle,
 } from "lucide-react";
 import { useResumes } from "@/context/ResumesContext";
 
 const startOptions = [
-  { id: "ai",       icon: Sparkles, title: "Start with AI",          description: "Answer a few questions and let AI build your resume instantly.",       tag: "Fastest",      tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30", color: "border-purple-500/30 hover:border-purple-500/60", iconBg: "bg-purple-600" },
-  { id: "blank",    icon: FileText, title: "Start from scratch",      description: "Build your resume section by section with AI assistance available.",    tag: "Full Control", tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",   color: "border-blue-500/30 hover:border-blue-500/60",   iconBg: "bg-blue-600" },
-  { id: "linkedin", icon: Link2,    title: "Import from LinkedIn",    description: "Paste your LinkedIn profile text and AI will format it for you.",       tag: "Quickest",     tagColor: "bg-sky-500/20 text-sky-300 border-sky-500/30",     color: "border-sky-500/30 hover:border-sky-500/60",     iconBg: "bg-sky-600" },
-  { id: "upload",   icon: Upload,   title: "Upload existing resume",  description: "Upload a PDF or paste your resume text and AI will parse it for you.",  tag: "Improve",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
+  { id: "ai",     icon: Sparkles, title: "Start with AI",         description: "Answer a few questions and let AI build your resume instantly.",      tag: "Fastest",      tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30", color: "border-purple-500/30 hover:border-purple-500/60", iconBg: "bg-purple-600" },
+  { id: "blank",  icon: FileText, title: "Start from scratch",     description: "Build your resume section by section with full control.",             tag: "Full Control", tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",   color: "border-blue-500/30 hover:border-blue-500/60",   iconBg: "bg-blue-600" },
+  { id: "upload", icon: Upload,   title: "Upload existing resume", description: "Upload a .txt file or paste your resume text and AI will parse it.", tag: "Improve",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
 ];
 
-type Step = "select" | "ai-questions" | "linkedin-paste" | "upload-paste";
+type Step = "select" | "ai-questions" | "upload-paste";
 
 export default function NewResumePage() {
   const router = useRouter();
@@ -58,26 +57,14 @@ export default function NewResumePage() {
       return;
     }
 
-    if (selected === "linkedin" && step === "select") {
-      setStep("linkedin-paste");
-      return;
-    }
-
     if (selected === "upload" && step === "select") {
       setStep("upload-paste");
       return;
     }
 
-    // Parse with AI (linkedin or upload paste step)
+    // Parse with AI
     if (!pasteText.trim()) {
       setError("Please enter some text.");
-      return;
-    }
-
-    const trimmed = pasteText.trim();
-    const looksLikeUrl = /^https?:\/\/\S+$/.test(trimmed);
-    if (looksLikeUrl) {
-      setError("Please paste the text from your LinkedIn PDF — not the profile URL. Go to LinkedIn → More → Save to PDF → open the PDF → Ctrl+A → copy → paste here.");
       return;
     }
 
@@ -129,13 +116,11 @@ export default function NewResumePage() {
           <h1 className="text-2xl font-bold text-white mb-2">
             {step === "select" ? "Create a new resume" :
              step === "ai-questions" ? "Tell AI about yourself" :
-             step === "linkedin-paste" ? "Paste your LinkedIn profile" :
              "Paste or upload your resume"}
           </h1>
           <p className="text-[#94A3B8] text-sm">
             {step === "select" ? "How would you like to get started?" :
              step === "ai-questions" ? "Answer a few quick questions and AI will craft your resume" :
-             step === "linkedin-paste" ? "Go to your LinkedIn profile → More → Save to PDF, then copy and paste the text here" :
              "Upload a .txt file or paste your resume text below"}
           </p>
         </motion.div>
@@ -143,7 +128,7 @@ export default function NewResumePage() {
         <AnimatePresence mode="wait">
           {/* Select step */}
           {step === "select" && (
-            <motion.div key="select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid grid-cols-2 gap-4 mb-6">
+            <motion.div key="select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               {startOptions.map((option, i) => {
                 const Icon = option.icon;
                 const active = selected === option.id;
@@ -189,24 +174,6 @@ export default function NewResumePage() {
                 <label className="block text-sm font-medium text-[#94A3B8] mb-2">Key skills (comma separated)</label>
                 <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." />
               </div>
-            </motion.div>
-          )}
-
-          {/* LinkedIn paste step */}
-          {step === "linkedin-paste" && (
-            <motion.div key="linkedin" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-4">
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20">
-                <CheckCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-sky-300">
-                  Go to your LinkedIn profile → <strong>More</strong> → <strong>Save to PDF</strong> → open the PDF → select all (Ctrl+A) → copy → paste here.
-                </p>
-              </div>
-              <textarea
-                value={pasteText}
-                onChange={(e) => setPasteText(e.target.value)}
-                placeholder="Paste your LinkedIn profile text here..."
-                className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
-              />
             </motion.div>
           )}
 
@@ -256,10 +223,10 @@ export default function NewResumePage() {
           >
             {loading ? (
               <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              {step === "linkedin-paste" || step === "upload-paste" ? "AI Parsing..." : "Creating..."}</>
+              {step === "upload-paste" ? "AI Parsing..." : "Creating..."}</>
             ) : step === "ai-questions" ? (
               <><Sparkles className="w-4 h-4" /> Generate My Resume</>
-            ) : step === "linkedin-paste" || step === "upload-paste" ? (
+            ) : step === "upload-paste" ? (
               <><Sparkles className="w-4 h-4" /> Parse with AI</>
             ) : (
               <>Continue <ArrowRight className="w-4 h-4" /></>
