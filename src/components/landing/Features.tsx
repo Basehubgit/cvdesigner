@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Target, FileDown, Mail, LayoutTemplate, TrendingUp, Globe, Link2, Zap, Shield } from "lucide-react";
+import { Sparkles, Target, FileDown, LayoutTemplate, TrendingUp, Zap } from "lucide-react";
 
 const features = [
   {
     icon: Sparkles,
     title: "AI Writing Engine",
-    description: "Claude AI analyzes your experience and automatically generates compelling, professional bullet points that highlight your impact.",
+    description: "AI analyzes your experience and automatically generates compelling, professional bullet points that highlight your impact.",
     color: "from-purple-600 to-purple-800",
     glow: "rgba(124, 58, 237, 0.3)",
     tag: "Core",
@@ -15,7 +15,7 @@ const features = [
   {
     icon: Target,
     title: "ATS Optimization",
-    description: "Every resume is optimized for Applicant Tracking Systems. We analyze job descriptions and tailor keywords automatically.",
+    description: "Every resume is scored for Applicant Tracking Systems in real time. See your ATS score live as you build.",
     color: "from-blue-600 to-blue-800",
     glow: "rgba(37, 99, 235, 0.3)",
     tag: "Smart",
@@ -23,23 +23,15 @@ const features = [
   {
     icon: FileDown,
     title: "One-Click PDF Export",
-    description: "Download pixel-perfect, professionally formatted PDFs instantly. Your resume looks stunning in every viewer.",
+    description: "Download professionally formatted PDFs instantly. Your resume looks stunning in every viewer.",
     color: "from-emerald-600 to-emerald-800",
     glow: "rgba(5, 150, 105, 0.3)",
     tag: "Export",
   },
   {
-    icon: Mail,
-    title: "Cover Letter AI",
-    description: "Generate personalized cover letters for any job posting. AI writes compelling narratives tailored to each company.",
-    color: "from-pink-600 to-pink-800",
-    glow: "rgba(219, 39, 119, 0.3)",
-    tag: "New",
-  },
-  {
     icon: LayoutTemplate,
-    title: "Premium Templates",
-    description: "20+ modern, recruiter-approved templates. From minimalist to creative — find your perfect professional look.",
+    title: "Professional Templates",
+    description: "8 modern, recruiter-approved templates. From minimalist to creative — find your perfect professional look.",
     color: "from-orange-600 to-orange-800",
     glow: "rgba(234, 88, 12, 0.3)",
     tag: "Design",
@@ -47,34 +39,10 @@ const features = [
   {
     icon: TrendingUp,
     title: "Resume Improvement AI",
-    description: "Paste your existing resume and our AI provides specific, actionable improvements to maximize your interview chances.",
+    description: "Upload your existing resume and our AI rewrites it with stronger language, action verbs, and measurable impact.",
     color: "from-cyan-600 to-cyan-800",
     glow: "rgba(8, 145, 178, 0.3)",
     tag: "AI",
-  },
-  {
-    icon: Globe,
-    title: "Multi-Language Support",
-    description: "Create resumes in 15+ languages. Perfect for international job applications and global career opportunities.",
-    color: "from-violet-600 to-violet-800",
-    glow: "rgba(109, 40, 217, 0.3)",
-    tag: "Global",
-  },
-  {
-    icon: Link2,
-    title: "LinkedIn Import",
-    description: "One-click import from your LinkedIn profile. We automatically extract and format your professional history.",
-    color: "from-sky-600 to-sky-800",
-    glow: "rgba(2, 132, 199, 0.3)",
-    tag: "Import",
-  },
-  {
-    icon: Zap,
-    title: "Job-Specific Optimization",
-    description: "Paste any job description and AI instantly tailors your resume to match exactly what employers are looking for.",
-    color: "from-yellow-600 to-yellow-800",
-    glow: "rgba(202, 138, 4, 0.3)",
-    tag: "Smart",
   },
 ];
 
