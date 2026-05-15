@@ -70,14 +70,14 @@ export default function NewResumePage() {
 
     // Parse with AI (linkedin or upload paste step)
     if (!pasteText.trim()) {
-      setError("Please enter some text.");
+      setError("Lütfen metin girin.");
       return;
     }
 
     const trimmed = pasteText.trim();
     const looksLikeUrl = /^https?:\/\/\S+$/.test(trimmed);
     if (looksLikeUrl) {
-      setError("Please paste the text content from your LinkedIn PDF — not the profile URL. Go to your LinkedIn profile → More → Save to PDF, open the PDF, select all text (Ctrl+A), copy, and paste here.");
+      setError("Profil linki değil, LinkedIn PDF'inden kopyaladığın metni yapıştır. LinkedIn profiline git → Daha fazla → PDF olarak kaydet → PDF'i aç → Ctrl+A ile tümünü seç → kopyala → buraya yapıştır.");
       return;
     }
 
