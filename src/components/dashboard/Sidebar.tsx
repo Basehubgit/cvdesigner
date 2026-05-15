@@ -70,7 +70,7 @@ export default function Sidebar() {
       >
         {/* Logo */}
         <div className="p-5 border-b border-white/5 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center">
               <FileText className="w-4 h-4 text-white" />
             </div>
