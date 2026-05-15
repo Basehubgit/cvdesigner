@@ -11,14 +11,13 @@ import { useResumes } from "@/context/ResumesContext";
 import { useCredits } from "@/context/CreditsContext";
 
 const startOptions = [
-  { id: "ai",      icon: Sparkles,       title: "Start with AI",         description: "Answer a few questions and let AI build your resume instantly.",              tag: "Fastest",     tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",   color: "border-purple-500/30 hover:border-purple-500/60",   iconBg: "bg-purple-600" },
-  { id: "blank",   icon: FileText,       title: "Start from scratch",    description: "Build your resume section by section with full control.",                     tag: "Full Control",tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",     color: "border-blue-500/30 hover:border-blue-500/60",     iconBg: "bg-blue-600" },
+{ id: "blank",   icon: FileText,       title: "Start from scratch",    description: "Build your resume section by section with full control.",                     tag: "Full Control",tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",     color: "border-blue-500/30 hover:border-blue-500/60",     iconBg: "bg-blue-600" },
   { id: "upload",  icon: Upload,         title: "Upload resume",         description: "Upload your PDF or .txt — AI will parse it into the resume builder.",        tag: "Import",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
   { id: "improve", icon: Zap,            title: "AI Resume Boost",       description: "Upload your CV and AI rewrites it with stronger language, metrics & impact.", tag: "AI Powered",  tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",     color: "border-amber-500/30 hover:border-amber-500/60",     iconBg: "bg-amber-500" },
   { id: "paste",   icon: ClipboardPaste, title: "Paste resume text",     description: "Copy and paste your resume text — AI will parse and format it instantly.",  tag: "Quick",       tagColor: "bg-pink-500/20 text-pink-300 border-pink-500/30",       color: "border-pink-500/30 hover:border-pink-500/60",       iconBg: "bg-pink-600" },
 ];
 
-type Step = "select" | "ai-questions" | "upload-paste" | "improve-upload" | "paste-text";
+type Step = "select" | "upload-paste" | "improve-upload" | "paste-text";
 
 export default function NewResumePage() {
   const router = useRouter();
@@ -26,9 +25,6 @@ export default function NewResumePage() {
   const { deductCredit, openPurchase } = useCredits();
   const [selected, setSelected] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("select");
-  const [jobTitle, setJobTitle]   = useState("");
-  const [experience, setExperience] = useState("");
-  const [skills, setSkills]       = useState("");
   const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("Creating...");
@@ -64,28 +60,7 @@ export default function NewResumePage() {
       return;
     }
 
-    if (selected === "ai" && step === "select") { setStep("ai-questions"); return; }
-    if (selected === "ai" && step === "ai-questions") {
-      if (!(await deductCredit())) { openPurchase(); return; }
-      setLoading(true);
-      setLoadingMsg("AI is generating your resume...");
-      try {
-        const res = await fetch("/api/ai/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jobTitle, experience, skills }),
-        });
-        if (!res.ok) throw new Error("Generate failed");
-        const formData = await res.json();
-        await goToBuilder(formData);
-      } catch {
-        setLoading(false);
-        setError("AI generation failed. Please try again.");
-      }
-      return;
-    }
-
-    if (selected === "upload" && step === "select") { setStep("upload-paste"); return; }
+if (selected === "upload" && step === "select") { setStep("upload-paste"); return; }
     if (selected === "improve" && step === "select") { setStep("improve-upload"); return; }
     if (selected === "paste" && step === "select") { setStep("paste-text"); return; }
 
@@ -199,17 +174,15 @@ export default function NewResumePage() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">
-            {step === "select"        ? "Create a new resume" :
-             step === "ai-questions"  ? "Tell AI about yourself" :
+            {step === "select"         ? "Create a new resume" :
              step === "improve-upload" ? "AI Resume Boost" :
-             step === "paste-text"    ? "Paste your resume" :
+             step === "paste-text"     ? "Paste your resume" :
              "Upload your resume"}
           </h1>
           <p className="text-[#94A3B8] text-sm">
-            {step === "select"        ? "How would you like to get started?" :
-             step === "ai-questions"  ? "Answer a few quick questions and AI will craft your resume" :
-             step === "improve-upload"? "Upload your existing CV — AI will rewrite it to be more impactful" :
-             step === "paste-text" ? "Copy your resume text and paste it below — AI will format it" :
+            {step === "select"         ? "How would you like to get started?" :
+             step === "improve-upload" ? "Upload your existing CV — AI will rewrite it to be more impactful" :
+             step === "paste-text"     ? "Copy your resume text and paste it below — AI will format it" :
              "Upload your PDF or .txt file and AI will parse it into the builder"}
           </p>
         </motion.div>
@@ -240,27 +213,6 @@ export default function NewResumePage() {
                   </motion.button>
                 );
               })}
-            </motion.div>
-          )}
-
-          {step === "ai-questions" && (
-            <motion.div key="ai" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">What role are you applying for?</label>
-                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. Senior Software Engineer, Product Manager..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Years of experience</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {["0-1", "2-4", "5-9", "10+"].map((y) => (
-                    <button key={y} onClick={() => setExperience(y)} className={`py-2.5 rounded-xl text-sm font-medium transition-all ${experience === y ? "btn-primary text-white" : "border border-white/10 text-[#64748B] hover:text-white hover:bg-white/5"}`}>{y}</button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Key skills (comma separated)</label>
-                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." value={skills} onChange={(e) => setSkills(e.target.value)} />
-              </div>
             </motion.div>
           )}
 
@@ -295,8 +247,6 @@ export default function NewResumePage() {
           >
             {loading ? (
               <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{loadingMsg}</>
-            ) : step === "ai-questions" ? (
-              <><Sparkles className="w-4 h-4" /> Generate My Resume</>
             ) : step === "improve-upload" ? (
               <><Zap className="w-4 h-4" /> Boost with AI</>
             ) : step === "upload-paste" || step === "paste-text" ? (
