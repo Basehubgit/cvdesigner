@@ -74,19 +74,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return error.message;
-    return null;
+    try {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin.")), 15000)
+      );
+      const { error } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ]);
+      if (error) return error.message;
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : "Giriş başarısız. Lütfen tekrar deneyin.";
+    }
   };
 
   const signup = async (name: string, email: string, password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name } },
-    });
-    if (error) return error.message;
-    return null;
+    try {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin.")), 15000)
+      );
+      const { error } = await Promise.race([
+        supabase.auth.signUp({ email, password, options: { data: { name } } }),
+        timeout,
+      ]);
+      if (error) return error.message;
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : "Kayıt başarısız. Lütfen tekrar deneyin.";
+    }
   };
 
   const logout = async () => {

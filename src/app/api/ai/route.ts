@@ -1,7 +1,6 @@
 import Replicate from "replicate";
 import { NextRequest } from "next/server";
-
-const MODEL = "meta/meta-llama-3.1-70b-instruct";
+import { REPLICATE_MODEL, replicateEventToText } from "@/lib/ai";
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   chat: `You are an expert resume writing assistant. Help users craft professional, ATS-optimized resumes.
@@ -33,32 +32,24 @@ export async function POST(req: NextRequest) {
 
   const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
-  const encoder = new TextEncoder();
+  let result = "";
+  try {
+    const output = await replicate.run(REPLICATE_MODEL, {
+      input: {
+        prompt: message,
+        system_prompt: SYSTEM_PROMPTS[type] ?? SYSTEM_PROMPTS.chat,
+        max_tokens: 1024,
+        temperature: 0.7,
+        top_p: 0.9,
+      },
+    });
+    result = replicateEventToText(output);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    result = `[Error: ${msg}]`;
+  }
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const event of replicate.stream(MODEL, {
-          input: {
-            prompt: message,
-            system_prompt: SYSTEM_PROMPTS[type] ?? SYSTEM_PROMPTS.chat,
-            max_tokens: 1024,
-            temperature: 0.7,
-            top_p: 0.9,
-          },
-        })) {
-          controller.enqueue(encoder.encode(String(event)));
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Unknown error";
-        controller.enqueue(encoder.encode(`\n\n[Error: ${msg}]`));
-      } finally {
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
+  return new Response(result, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "X-Content-Type-Options": "nosniff",

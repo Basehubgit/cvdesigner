@@ -32,13 +32,6 @@ const TEMPLATES = [
   { id: "tech",      name: "Tech",      headerBg: "from-emerald-900 to-slate-900",  accent: "#10B981", accentText: "text-emerald-300" },
 ];
 
-const SKILL_SUGGESTIONS: Record<string, string[]> = {
-  default: ["Communication", "Problem Solving", "Agile", "Git", "SQL", "Python"],
-  design: ["Figma", "Adobe XD", "Sketch", "Prototyping", "User Research", "Wireframing"],
-  frontend: ["React", "TypeScript", "Next.js", "Tailwind CSS", "GraphQL", "Testing"],
-  backend: ["Node.js", "Python", "PostgreSQL", "Redis", "Docker", "REST APIs"],
-};
-
 type EducationItem = { id: string; degree: string; institution: string; year: string; gpa: string };
 type CertItem     = { id: string; name: string; org: string; year: string; credentialId: string };
 type ExpItem      = { id: string; role: string; company: string; location: string; period: string; description: string };

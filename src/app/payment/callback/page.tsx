@@ -21,6 +21,7 @@ function CallbackContent() {
         setTimeout(() => router.push("/dashboard"), 2500);
       });
     } else if (result === "failure") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("failure");
       setTimeout(() => router.push("/dashboard"), 3000);
     }

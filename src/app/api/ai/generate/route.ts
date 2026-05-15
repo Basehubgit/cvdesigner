@@ -1,7 +1,6 @@
 import Replicate from "replicate";
 import { NextRequest, NextResponse } from "next/server";
-
-const MODEL = "meta/meta-llama-3.1-70b-instruct";
+import { extractJsonObject, normalizeResumeData, REPLICATE_MODEL, replicateEventToText } from "@/lib/ai";
 
 const SYSTEM_PROMPT = `You are an expert resume writer. Generate a complete, professional resume based on the given information.
 Return ONLY a valid JSON object (no markdown, no explanation):
@@ -43,28 +42,28 @@ export async function POST(req: NextRequest) {
   const prompt = `Generate a complete resume for a ${jobTitle || "Professional"} with ${experience || "2-4"} years of experience.${skills ? ` Key skills to include: ${skills}.` : ""}`;
 
   let result = "";
-  for await (const event of replicate.stream(MODEL, {
-    input: {
-      prompt,
-      system_prompt: SYSTEM_PROMPT,
-      max_tokens: 2048,
-      temperature: 0.4,
-    },
-  })) {
-    result += String(event);
+  try {
+    const output = await replicate.run(REPLICATE_MODEL, {
+      input: {
+        prompt,
+        system_prompt: SYSTEM_PROMPT,
+        max_tokens: 2048,
+        temperature: 0.4,
+      },
+    });
+    result = replicateEventToText(output);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown Replicate error";
+    return NextResponse.json({ error: `AI provider error: ${message}` }, { status: 502 });
   }
 
-  const jsonMatch = result.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
+  const jsonText = extractJsonObject(result);
+  if (!jsonText) {
     return NextResponse.json({ error: "Failed to generate resume" }, { status: 500 });
   }
 
   try {
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (parsed.experience) parsed.experience = parsed.experience.map((e: Record<string, unknown>, i: number) => ({ ...e, id: String(Date.now() + i) }));
-    if (parsed.education)  parsed.education  = parsed.education.map((e: Record<string, unknown>, i: number) => ({ ...e, id: String(Date.now() + i + 100) }));
-    if (parsed.certifications) parsed.certifications = parsed.certifications.map((e: Record<string, unknown>, i: number) => ({ ...e, id: String(Date.now() + i + 200) }));
-    return NextResponse.json(parsed);
+    return NextResponse.json(normalizeResumeData(JSON.parse(jsonText)));
   } catch {
     return NextResponse.json({ error: "Invalid response from AI" }, { status: 500 });
   }

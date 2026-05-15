@@ -17,7 +17,7 @@ const suggestions = [
 ];
 
 export default function AIAssistantPage() {
-  const { deductCredit } = useCredits();
+  const { deductCredit, openPurchase } = useCredits();
   const [messages, setMessages] = useState<Message[]>([
     { role: "ai", text: "Hi! I'm your AI resume assistant. I can help you write stronger bullet points, improve your summary, optimize for ATS, suggest skills, and more. What would you like to work on?" },
   ]);
@@ -33,8 +33,11 @@ export default function AIAssistantPage() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
-    const ok = deductCredit();
-    if (!ok) return;
+    const ok = await deductCredit();
+    if (!ok) {
+      openPurchase();
+      return;
+    }
     setInput("");
     setError(null);
     setMessages((prev) => [...prev, { role: "user", text }]);

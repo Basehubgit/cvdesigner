@@ -2,14 +2,21 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Eye, EyeOff, Sparkles, ArrowRight, Code2, Globe, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/dashboard");
+    });
+  }, [router]);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,12 +33,17 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-    if (!result) {
-      router.push("/dashboard");
-    } else {
-      setError(result);
+    try {
+      const result = await login(email, password);
+      if (!result) {
+        router.push("/dashboard");
+      } else {
+        setError(result);
+      }
+    } catch {
+      setError("Bağlantı hatası. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [previewResume, setPreviewResume] = useState<ResumeData | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [toasts, setToasts]         = useState<Toast[]>([]);
+  const nextToastId = useRef(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const avgAts = resumes.length > 0 ? Math.round(resumes.reduce((s, r) => s + (r.atsScore || 0), 0) / resumes.length) : 0;
@@ -36,7 +37,7 @@ export default function DashboardPage() {
   ];
 
   const addToast = (message: string, type: Toast["type"] = "success") => {
-    const id = Date.now();
+    const id = ++nextToastId.current;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
   };

@@ -12,7 +12,7 @@ function generateRandomString(length = 12): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { packageId, price, user } = await req.json() as {
+  const { packageId, user } = await req.json() as {
     packageId: string;
     price: number;
     credits: number;

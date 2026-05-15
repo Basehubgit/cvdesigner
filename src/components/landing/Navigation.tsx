@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { FileText, Menu, X, Sparkles, ChevronDown } from "lucide-react";
+import { FileText, Menu, X, Sparkles } from "lucide-react";
 
 const navLinks = [
   { label: "Features", href: "#features" },

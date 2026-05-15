@@ -24,7 +24,7 @@ export default function TermsPage() {
 
         <div className="space-y-8 text-[#94A3B8] text-sm leading-relaxed">
           <Section title="1. Acceptance of Terms">
-            By accessing or using CVDesignerAI ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service. We reserve the right to update these terms at any time; your continued use of the Service constitutes acceptance of any changes.
+            By accessing or using CVDesignerAI (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service. We reserve the right to update these terms at any time; your continued use of the Service constitutes acceptance of any changes.
           </Section>
 
           <Section title="2. Description of Service">

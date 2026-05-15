@@ -23,7 +23,7 @@ type Step = "select" | "ai-questions" | "upload-paste" | "improve-upload" | "pas
 export default function NewResumePage() {
   const router = useRouter();
   const { createResume, saveResume } = useResumes();
-  const { deductCredit } = useCredits();
+  const { deductCredit, openPurchase } = useCredits();
   const [selected, setSelected] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("select");
   const [jobTitle, setJobTitle]   = useState("");
@@ -66,7 +66,7 @@ export default function NewResumePage() {
 
     if (selected === "ai" && step === "select") { setStep("ai-questions"); return; }
     if (selected === "ai" && step === "ai-questions") {
-      if (!(await deductCredit())) return;
+      if (!(await deductCredit())) { openPurchase(); return; }
       setLoading(true);
       setLoadingMsg("AI is generating your resume...");
       try {
@@ -95,7 +95,7 @@ export default function NewResumePage() {
       return;
     }
 
-    if (!(await deductCredit())) return;
+    if (!(await deductCredit())) { openPurchase(); return; }
     setLoading(true);
     const endpoint = selected === "improve" ? "/api/ai/improve" : "/api/ai/parse";
     setLoadingMsg(selected === "improve" ? "AI is boosting your resume..." : "AI Parsing...");

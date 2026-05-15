@@ -82,6 +82,7 @@ export function ResumesProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user !== undefined) fetchAll();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

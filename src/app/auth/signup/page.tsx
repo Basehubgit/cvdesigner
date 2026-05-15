@@ -2,10 +2,11 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Eye, EyeOff, Sparkles, ArrowRight, Code2, Globe, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 const benefits = [
   "Free forever plan available",
@@ -16,6 +17,11 @@ const benefits = [
 export default function SignupPage() {
   const { signup } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.signOut({ scope: "local" }).catch(() => {});
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,12 +39,17 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const result = await signup(name, email, password);
-    setLoading(false);
-    if (!result) {
-      router.push("/dashboard");
-    } else {
-      setError(result);
+    try {
+      const result = await signup(name, email, password);
+      if (!result) {
+        router.push("/dashboard");
+      } else {
+        setError(result);
+      }
+    } catch {
+      setError("Bağlantı hatası. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 

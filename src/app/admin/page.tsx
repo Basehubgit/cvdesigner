@@ -57,7 +57,11 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const patchUser = async (id: string, body: Partial<UserRow>) => {
     await fetch(`/api/admin/users/${id}`, {

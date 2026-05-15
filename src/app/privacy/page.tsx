@@ -87,7 +87,7 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="10. Changes to This Policy">
-            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date. Your continued use of the Service after any changes constitutes your acceptance of the new policy.
+            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the &quot;Last updated&quot; date. Your continued use of the Service after any changes constitutes your acceptance of the new policy.
           </Section>
 
           <Section title="11. Contact Us">

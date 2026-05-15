@@ -20,7 +20,6 @@ export default function SettingsPage() {
   const { user, logout, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [saved, setSaved]         = useState(false);
-  const [showOldPw, setShowOldPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [pwError, setPwError]     = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState(false);
