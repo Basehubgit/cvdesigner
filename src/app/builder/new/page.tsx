@@ -5,18 +5,19 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles, FileText, Upload, ArrowRight, ChevronLeft,
-  Wand2, AlertCircle, Zap,
+  Wand2, AlertCircle, Zap, ClipboardPaste,
 } from "lucide-react";
 import { useResumes } from "@/context/ResumesContext";
 
 const startOptions = [
-  { id: "ai",      icon: Sparkles, title: "Start with AI",         description: "Answer a few questions and let AI build your resume instantly.",              tag: "Fastest",     tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",   color: "border-purple-500/30 hover:border-purple-500/60",   iconBg: "bg-purple-600" },
-  { id: "blank",   icon: FileText, title: "Start from scratch",     description: "Build your resume section by section with full control.",                     tag: "Full Control",tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",     color: "border-blue-500/30 hover:border-blue-500/60",     iconBg: "bg-blue-600" },
-  { id: "upload",  icon: Upload,   title: "Upload existing resume", description: "Upload your PDF or paste text — AI will parse it into the resume builder.",   tag: "Improve",     tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
-  { id: "improve", icon: Zap,      title: "AI Resume Boost",        description: "Upload your CV and AI rewrites it with stronger language, metrics & impact.", tag: "AI Powered",  tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",     color: "border-amber-500/30 hover:border-amber-500/60",     iconBg: "bg-amber-500" },
+  { id: "ai",      icon: Sparkles,       title: "Start with AI",         description: "Answer a few questions and let AI build your resume instantly.",              tag: "Fastest",     tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",   color: "border-purple-500/30 hover:border-purple-500/60",   iconBg: "bg-purple-600" },
+  { id: "blank",   icon: FileText,       title: "Start from scratch",    description: "Build your resume section by section with full control.",                     tag: "Full Control",tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",     color: "border-blue-500/30 hover:border-blue-500/60",     iconBg: "bg-blue-600" },
+  { id: "upload",  icon: Upload,         title: "Upload resume",         description: "Upload your PDF or .txt — AI will parse it into the resume builder.",        tag: "Import",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
+  { id: "improve", icon: Zap,            title: "AI Resume Boost",       description: "Upload your CV and AI rewrites it with stronger language, metrics & impact.", tag: "AI Powered",  tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",     color: "border-amber-500/30 hover:border-amber-500/60",     iconBg: "bg-amber-500" },
+  { id: "paste",   icon: ClipboardPaste, title: "Paste resume text",     description: "Copy and paste your resume text — AI will parse and format it instantly.",  tag: "Quick",       tagColor: "bg-pink-500/20 text-pink-300 border-pink-500/30",       color: "border-pink-500/30 hover:border-pink-500/60",       iconBg: "bg-pink-600" },
 ];
 
-type Step = "select" | "ai-questions" | "upload-paste" | "improve-upload";
+type Step = "select" | "ai-questions" | "upload-paste" | "improve-upload" | "paste-text";
 
 export default function NewResumePage() {
   const router = useRouter();
@@ -70,8 +71,9 @@ export default function NewResumePage() {
 
     if (selected === "upload" && step === "select") { setStep("upload-paste"); return; }
     if (selected === "improve" && step === "select") { setStep("improve-upload"); return; }
+    if (selected === "paste" && step === "select") { setStep("paste-text"); return; }
 
-    // Parse or Improve flow
+    // Parse / Improve / Paste flow
     if (!pasteText.trim()) {
       setError("Please enter some text or upload a file.");
       return;
@@ -182,20 +184,22 @@ export default function NewResumePage() {
           <h1 className="text-2xl font-bold text-white mb-2">
             {step === "select"        ? "Create a new resume" :
              step === "ai-questions"  ? "Tell AI about yourself" :
-             step === "improve-upload"? "AI Resume Boost" :
+             step === "improve-upload" ? "AI Resume Boost" :
+             step === "paste-text"    ? "Paste your resume" :
              "Upload your resume"}
           </h1>
           <p className="text-[#94A3B8] text-sm">
             {step === "select"        ? "How would you like to get started?" :
              step === "ai-questions"  ? "Answer a few quick questions and AI will craft your resume" :
              step === "improve-upload"? "Upload your existing CV — AI will rewrite it to be more impactful" :
+             step === "paste-text" ? "Copy your resume text and paste it below — AI will format it" :
              "Upload your PDF or .txt file and AI will parse it into the builder"}
           </p>
         </motion.div>
 
         <AnimatePresence mode="wait">
           {step === "select" && (
-            <motion.div key="select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid grid-cols-2 gap-4 mb-6">
+            <motion.div key="select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
               {startOptions.map((option, i) => {
                 const Icon = option.icon;
                 const active = selected === option.id;
@@ -245,6 +249,19 @@ export default function NewResumePage() {
 
           {step === "upload-paste"  && uploadUI(false)}
           {step === "improve-upload" && uploadUI(true)}
+
+          {step === "paste-text" && (
+            <motion.div key="paste" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6">
+              <label className="block text-sm font-medium text-[#94A3B8] mb-3">Paste your resume text</label>
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder="Paste your resume content here..."
+                className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-64"
+                autoFocus
+              />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {error && (
@@ -265,7 +282,7 @@ export default function NewResumePage() {
               <><Sparkles className="w-4 h-4" /> Generate My Resume</>
             ) : step === "improve-upload" ? (
               <><Zap className="w-4 h-4" /> Boost with AI</>
-            ) : step === "upload-paste" ? (
+            ) : step === "upload-paste" || step === "paste-text" ? (
               <><Sparkles className="w-4 h-4" /> Parse with AI</>
             ) : (
               <>Continue <ArrowRight className="w-4 h-4" /></>
