@@ -1,63 +1,108 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
-interface User { name: string; email: string }
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  logout: () => void;
-}
+export type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  credits: number;
+  is_admin: boolean;
+  is_banned: boolean;
+  headline: string;
+  location: string;
+};
+
+type AuthContextType = {
+  user: AuthUser | null | undefined;
+  login: (email: string, password: string) => Promise<string | null>;
+  signup: (name: string, email: string, password: string) => Promise<string | null>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  updateProfile: (data: Partial<Pick<AuthUser, "name" | "headline" | "location">>) => Promise<void>;
+};
 
 const AuthContext = createContext<AuthContextType | null>(null);
-const SESSION_KEY = "cvdesignerai_user";
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+async function fetchProfile(userId: string): Promise<AuthUser | null> {
+  const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
+  if (!data) return null;
+  return {
+    id: data.id,
+    name: data.name ?? "",
+    email: data.email ?? "",
+    credits: data.credits ?? 0,
+    is_admin: data.is_admin ?? false,
+    is_banned: data.is_banned ?? false,
+    headline: data.headline ?? "",
+    location: data.location ?? "",
+  };
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   const router = useRouter();
 
-  useEffect(() => {
-    const stored = localStorage.getItem(SESSION_KEY);
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch {}
+  const refreshUser = async () => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const profile = await fetchProfile(authUser.id);
+      setUser(profile);
     }
-    setHydrated(true);
+  };
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(await fetchProfile(session.user.id));
+      } else {
+        setUser(null);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(await fetchProfile(session.user.id));
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const stored = localStorage.getItem(`cvdesignerai_account_${email}`);
-    if (!stored) return { ok: false, error: "No account found with this email" };
-    const account = JSON.parse(stored);
-    if (account.password !== password) return { ok: false, error: "Incorrect password" };
-    const u: User = { name: account.name, email };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-    setUser(u);
-    return { ok: true };
-  }, []);
+  const login = async (email: string, password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return error.message;
+    return null;
+  };
 
-  const signup = useCallback(async (name: string, email: string, password: string) => {
-    const existing = localStorage.getItem(`cvdesignerai_account_${email}`);
-    if (existing) return { ok: false, error: "An account with this email already exists" };
-    localStorage.setItem(`cvdesignerai_account_${email}`, JSON.stringify({ name, password }));
-    const u: User = { name, email };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-    setUser(u);
-    return { ok: true };
-  }, []);
+  const signup = async (name: string, email: string, password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) return error.message;
+    return null;
+  };
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY);
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     router.push("/auth/login");
-  }, [router]);
+  };
 
-  if (!hydrated) return null;
+  const updateProfile = async (data: Partial<Pick<AuthUser, "name" | "headline" | "location">>) => {
+    if (!user) return;
+    await supabase.from("profiles").update(data).eq("id", user.id);
+    setUser((prev) => prev ? { ...prev, ...data } : prev);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, refreshUser, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
@@ -65,6 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

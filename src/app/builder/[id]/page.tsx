@@ -58,7 +58,7 @@ const EMPTY_FORM = {
 
 export default function BuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { getResume, saveResume } = useResumes();
+  const { fetchResume, saveResume } = useResumes();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [activeSection, setActiveSection]   = useState<Section>("personal");
@@ -74,16 +74,18 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
 
   const [formData, setFormData] = useState(EMPTY_FORM);
 
-  // Load from localStorage on mount
+  // Load from Supabase on mount
   useEffect(() => {
-    const resume = getResume(id);
-    if (resume) {
-      setActiveTemplate(resume.template ?? "modern");
-      if (resume.formData && Object.keys(resume.formData).length > 0) {
-        setFormData(resume.formData as typeof EMPTY_FORM);
+    fetchResume(id).then((resume) => {
+      if (resume) {
+        setActiveTemplate(resume.template ?? "modern");
+        if (resume.formData && Object.keys(resume.formData).length > 0) {
+          setFormData(resume.formData as typeof EMPTY_FORM);
+        }
       }
-    }
-  }, [id, getResume]);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // Auto-save with debounce
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   };
 
   const handleAiImprove = async () => {
-    if (!deductCredit()) return;
+    if (!(await deductCredit())) return;
     setAiImproving(true);
     try {
       const improved = await callAI(
@@ -135,7 +137,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   };
 
   const handleAiSuggestSkills = async () => {
-    if (!deductCredit()) return;
+    if (!(await deductCredit())) return;
     setAiSuggestingSkills(true);
     try {
       const result = await callAI(
@@ -407,7 +409,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                             disabled={aiImprovingExp === i}
                             onClick={async () => {
                               if (!exp.description.trim()) return;
-                              if (!deductCredit()) return;
+                              if (!(await deductCredit())) return;
                               setAiImprovingExp(i);
                               try {
                                 const improved = await callAI(

@@ -42,7 +42,7 @@ const packages = [
 ];
 
 export default function PurchaseModal() {
-  const { purchaseOpen, closePurchase } = useCredits();
+  const { isPurchaseOpen: purchaseOpen, closePurchase } = useCredits();
   const [selected, setSelected] = useState("5cv");
   const [loading, setLoading] = useState(false);
   const [iyzipayForm, setIyzipayForm] = useState<string | null>(null);

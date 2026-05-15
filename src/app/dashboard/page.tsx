@@ -10,7 +10,7 @@ import {
   MoreHorizontal, Clock, Star, Zap, ArrowRight, Target,
   X, Copy, Trash2, Edit3, Check,
 } from "lucide-react";
-import { useResumes, type ResumeData } from "@/context/ResumesContext";
+import { useResumes, type Resume as ResumeData } from "@/context/ResumesContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCredits } from "@/context/CreditsContext";
 

@@ -28,10 +28,10 @@ export default function LoginPage() {
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    if (result.ok) {
+    if (!result) {
       router.push("/dashboard");
     } else {
-      setError(result.error ?? "Login failed");
+      setError(result);
     }
   };
 
