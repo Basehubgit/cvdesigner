@@ -1,42 +1,103 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, FileText, Link2, Upload, ArrowRight, ChevronLeft, Wand2, AlertCircle } from "lucide-react";
+import {
+  Sparkles, FileText, Link2, Upload, ArrowRight, ChevronLeft,
+  Wand2, AlertCircle, CheckCircle,
+} from "lucide-react";
 import { useResumes } from "@/context/ResumesContext";
 
 const startOptions = [
-  { id: "ai",       icon: Sparkles,  title: "Start with AI",             description: "Answer a few questions and let AI build your resume instantly.", tag: "Fastest",      tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30", color: "border-purple-500/30 hover:border-purple-500/60", iconBg: "bg-purple-600" },
-  { id: "blank",    icon: FileText,  title: "Start from scratch",         description: "Build your resume section by section with AI assistance available.", tag: "Full Control", tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30", color: "border-blue-500/30 hover:border-blue-500/60", iconBg: "bg-blue-600" },
-  { id: "linkedin", icon: Link2,     title: "Import from LinkedIn",       description: "Automatically import your profile data and we'll format it for you.", tag: "Quickest",     tagColor: "bg-sky-500/20 text-sky-300 border-sky-500/30", color: "border-sky-500/30 hover:border-sky-500/60", iconBg: "bg-sky-600" },
-  { id: "upload",   icon: Upload,    title: "Upload existing resume",     description: "Upload your current resume and AI will improve and reformat it.", tag: "Improve",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
+  { id: "ai",       icon: Sparkles, title: "Start with AI",          description: "Answer a few questions and let AI build your resume instantly.",       tag: "Fastest",      tagColor: "bg-purple-500/20 text-purple-300 border-purple-500/30", color: "border-purple-500/30 hover:border-purple-500/60", iconBg: "bg-purple-600" },
+  { id: "blank",    icon: FileText, title: "Start from scratch",      description: "Build your resume section by section with AI assistance available.",    tag: "Full Control", tagColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",   color: "border-blue-500/30 hover:border-blue-500/60",   iconBg: "bg-blue-600" },
+  { id: "linkedin", icon: Link2,    title: "Import from LinkedIn",    description: "Paste your LinkedIn profile text and AI will format it for you.",       tag: "Quickest",     tagColor: "bg-sky-500/20 text-sky-300 border-sky-500/30",     color: "border-sky-500/30 hover:border-sky-500/60",     iconBg: "bg-sky-600" },
+  { id: "upload",   icon: Upload,   title: "Upload existing resume",  description: "Upload a PDF or paste your resume text and AI will parse it for you.",  tag: "Improve",      tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", color: "border-emerald-500/30 hover:border-emerald-500/60", iconBg: "bg-emerald-600" },
 ];
 
-const COMING_SOON = ["linkedin", "upload"];
+type Step = "select" | "ai-questions" | "linkedin-paste" | "upload-paste";
 
 export default function NewResumePage() {
   const router = useRouter();
-  const { createResume } = useResumes();
+  const { createResume, saveResume } = useResumes();
   const [selected, setSelected] = useState<string | null>(null);
-  const [step, setStep] = useState<"select" | "ai-questions">("select");
+  const [step, setStep] = useState<Step>("select");
   const [jobTitle, setJobTitle] = useState("");
   const [experience, setExperience] = useState("");
+  const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const goToBuilder = async (formData?: Record<string, unknown>) => {
+    setLoading(true);
+    const id = await createResume("modern");
+    if (formData) {
+      await saveResume(id, { formData, title: (formData.name as string) || "Imported Resume" });
+    }
+    router.push(`/builder/${id}`);
+  };
 
   const handleContinue = async () => {
     if (!selected) return;
+    setError(null);
 
-    if (COMING_SOON.includes(selected)) return;
+    if (selected === "blank") {
+      await goToBuilder();
+      return;
+    }
 
     if (selected === "ai" && step === "select") {
       setStep("ai-questions");
       return;
     }
 
+    if (selected === "ai" && step === "ai-questions") {
+      await goToBuilder();
+      return;
+    }
+
+    if (selected === "linkedin" && step === "select") {
+      setStep("linkedin-paste");
+      return;
+    }
+
+    if (selected === "upload" && step === "select") {
+      setStep("upload-paste");
+      return;
+    }
+
+    // Parse with AI (linkedin or upload paste step)
+    if (!pasteText.trim()) {
+      setError("Lütfen metin girin.");
+      return;
+    }
+
     setLoading(true);
-    const id = await createResume("modern");
-    router.push(`/builder/${id}`);
+    try {
+      const res = await fetch("/api/ai/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pasteText }),
+      });
+      if (!res.ok) throw new Error("Parse failed");
+      const formData = await res.json();
+      await goToBuilder(formData);
+    } catch {
+      setLoading(false);
+      setError("AI parse edilemedi. Lütfen tekrar dene.");
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setPasteText(ev.target?.result as string ?? "");
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -47,11 +108,11 @@ export default function NewResumePage() {
       <div className="relative z-10 w-full max-w-2xl">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => step === "select" ? router.push("/dashboard") : setStep("select")}
             className="inline-flex items-center gap-1.5 text-xs text-[#64748B] hover:text-white mb-6 transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            Back to Dashboard
+            {step === "select" ? "Back to Dashboard" : "Back"}
           </button>
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
@@ -59,98 +120,140 @@ export default function NewResumePage() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">
-            {step === "select" ? "Create a new resume" : "Tell AI about yourself"}
+            {step === "select" ? "Create a new resume" :
+             step === "ai-questions" ? "Tell AI about yourself" :
+             step === "linkedin-paste" ? "Paste your LinkedIn profile" :
+             "Paste or upload your resume"}
           </h1>
           <p className="text-[#94A3B8] text-sm">
-            {step === "select" ? "How would you like to get started?" : "Answer a few quick questions and AI will craft your resume"}
+            {step === "select" ? "How would you like to get started?" :
+             step === "ai-questions" ? "Answer a few quick questions and AI will craft your resume" :
+             step === "linkedin-paste" ? "Go to your LinkedIn profile → More → Save to PDF, then copy and paste the text here" :
+             "Upload a .txt file or paste your resume text below"}
           </p>
         </motion.div>
 
-        {step === "select" && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-4 mb-6">
-            {startOptions.map((option, i) => {
-              const Icon = option.icon;
-              const active = selected === option.id;
-              const comingSoon = COMING_SOON.includes(option.id);
-              return (
-                <motion.button
-                  key={option.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.07 }}
-                  onClick={() => !comingSoon && setSelected(option.id)}
-                  className={`text-left p-5 rounded-2xl border transition-all relative ${
-                    comingSoon
-                      ? "border-white/5 glass-card opacity-60 cursor-not-allowed"
-                      : active
-                      ? `${option.color} bg-white/5 shadow-lg`
-                      : "border-white/8 glass-card hover:bg-white/5"
-                  }`}
-                >
-                  {comingSoon && (
-                    <span className="absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-[#64748B]">
-                      Coming Soon
-                    </span>
-                  )}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`w-9 h-9 ${option.iconBg} rounded-xl flex items-center justify-center`}>
-                      <Icon className="w-4 h-4 text-white" />
-                    </div>
-                    {!comingSoon && (
+        <AnimatePresence mode="wait">
+          {/* Select step */}
+          {step === "select" && (
+            <motion.div key="select" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid grid-cols-2 gap-4 mb-6">
+              {startOptions.map((option, i) => {
+                const Icon = option.icon;
+                const active = selected === option.id;
+                return (
+                  <motion.button
+                    key={option.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.07 }}
+                    onClick={() => setSelected(option.id)}
+                    className={`text-left p-5 rounded-2xl border transition-all ${active ? `${option.color} bg-white/5 shadow-lg` : "border-white/8 glass-card hover:bg-white/5"}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`w-9 h-9 ${option.iconBg} rounded-xl flex items-center justify-center`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${option.tagColor}`}>{option.tag}</span>
-                    )}
-                  </div>
-                  <h3 className={`text-sm font-semibold mb-1.5 ${active ? "text-white" : "text-[#94A3B8]"}`}>{option.title}</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed">{option.description}</p>
-                </motion.button>
-              );
-            })}
-          </motion.div>
-        )}
+                    </div>
+                    <h3 className={`text-sm font-semibold mb-1.5 ${active ? "text-white" : "text-[#94A3B8]"}`}>{option.title}</h3>
+                    <p className="text-xs text-[#64748B] leading-relaxed">{option.description}</p>
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          )}
 
-        {step === "select" && selected && COMING_SOON.includes(selected) && (
-          <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-4">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            Bu özellik yakında gelecek. Şimdilik &quot;Start from scratch&quot; veya &quot;Start with AI&quot; seçebilirsin.
+          {/* AI questions step */}
+          {step === "ai-questions" && (
+            <motion.div key="ai" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">What role are you applying for?</label>
+                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. Senior Software Engineer, Product Manager..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Years of experience</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {["0-1", "2-4", "5-9", "10+"].map((y) => (
+                    <button key={y} onClick={() => setExperience(y)} className={`py-2.5 rounded-xl text-sm font-medium transition-all ${experience === y ? "btn-primary text-white" : "border border-white/10 text-[#64748B] hover:text-white hover:bg-white/5"}`}>{y}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Key skills (comma separated)</label>
+                <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." />
+              </div>
+            </motion.div>
+          )}
+
+          {/* LinkedIn paste step */}
+          {step === "linkedin-paste" && (
+            <motion.div key="linkedin" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-4">
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20">
+                <CheckCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-sky-300">
+                  LinkedIn profiline git → <strong>More</strong> → <strong>Save to PDF</strong> → PDF&apos;i aç → tüm metni seç (Ctrl+A) → kopyala → buraya yapıştır.
+                </p>
+              </div>
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder="LinkedIn profil metninizi buraya yapıştırın..."
+                className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
+              />
+            </motion.div>
+          )}
+
+          {/* Upload/paste step */}
+          {step === "upload-paste" && (
+            <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Dosya yükle (.txt)</label>
+                <input ref={fileRef} type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full py-3 rounded-xl border border-dashed border-white/20 hover:border-emerald-500/40 text-sm text-[#64748B] hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Dosya seç (.txt)
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-[#475569]">veya</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">CV metninizi yapıştırın</label>
+                <textarea
+                  value={pasteText}
+                  onChange={(e) => setPasteText(e.target.value)}
+                  placeholder="CV içeriğinizi buraya yapıştırın..."
+                  className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {error && (
+          <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+            <AlertCircle className="w-4 h-4 shrink-0" /> {error}
           </div>
         )}
 
-        {step === "ai-questions" && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 mb-6 space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">What role are you applying for?</label>
-              <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. Senior Software Engineer, Product Manager..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Years of experience</label>
-              <div className="grid grid-cols-4 gap-2">
-                {["0-1", "2-4", "5-9", "10+"].map((y) => (
-                  <button key={y} onClick={() => setExperience(y)} className={`py-2.5 rounded-xl text-sm font-medium transition-all ${experience === y ? "btn-primary text-white" : "border border-white/10 text-[#64748B] hover:text-white hover:bg-white/5"}`}>{y}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Key skills (comma separated)</label>
-              <input className="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="e.g. React, TypeScript, Node.js..." />
-            </div>
-          </motion.div>
-        )}
-
         <div className="flex gap-3">
-          {step === "ai-questions" && (
-            <button onClick={() => setStep("select")} className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-sm text-[#64748B] hover:text-white hover:bg-white/5 transition-all">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </button>
-          )}
           <button
             onClick={handleContinue}
-            disabled={!selected || loading || (!!selected && COMING_SOON.includes(selected))}
+            disabled={(!selected && step === "select") || loading}
             className="flex-1 btn-primary flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating...</>
+              <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {step === "linkedin-paste" || step === "upload-paste" ? "AI Parsing..." : "Creating..."}</>
             ) : step === "ai-questions" ? (
               <><Sparkles className="w-4 h-4" /> Generate My Resume</>
+            ) : step === "linkedin-paste" || step === "upload-paste" ? (
+              <><Sparkles className="w-4 h-4" /> Parse with AI</>
             ) : (
               <>Continue <ArrowRight className="w-4 h-4" /></>
             )}

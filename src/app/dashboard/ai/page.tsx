@@ -19,7 +19,7 @@ const suggestions = [
 export default function AIAssistantPage() {
   const { deductCredit } = useCredits();
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", text: "Hi! I'm your AI resume assistant powered by Llama 3.1 70B. I can help you write stronger bullet points, improve your summary, optimize for ATS, and more. What would you like to work on?" },
+    { role: "ai", text: "Merhaba! Ben CVDesignerAI'nin yapay zeka asistanıyım. Özet bölümünü güçlendirme, deneyim maddelerini iyileştirme, ATS optimizasyonu ve daha fazlası için buradayım. Nasıl yardımcı olabilirim?" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
