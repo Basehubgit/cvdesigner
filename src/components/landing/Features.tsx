@@ -1,17 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Target, FileDown, LayoutTemplate, TrendingUp, Zap } from "lucide-react";
+import { Target, FileDown, LayoutTemplate, TrendingUp, Zap } from "lucide-react";
 
 const features = [
-  {
-    icon: Sparkles,
-    title: "AI Writing Engine",
-    description: "AI analyzes your experience and automatically generates compelling, professional bullet points that highlight your impact.",
-    color: "from-purple-600 to-purple-800",
-    glow: "rgba(124, 58, 237, 0.3)",
-    tag: "Core",
-  },
   {
     icon: Target,
     title: "ATS Optimization",
