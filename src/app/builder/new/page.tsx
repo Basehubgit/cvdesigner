@@ -136,7 +136,7 @@ export default function NewResumePage() {
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium text-[#94A3B8] mb-2">Upload file (.pdf or .txt)</label>
+        <label className="block text-sm font-medium text-[#94A3B8] mb-2">Upload your resume (.pdf or .txt)</label>
         <input
           ref={isImprove ? improveFileRef : fileRef}
           type="file"
@@ -146,29 +146,16 @@ export default function NewResumePage() {
         />
         <button
           onClick={() => (isImprove ? improveFileRef : fileRef).current?.click()}
-          className={`w-full py-3 rounded-xl border border-dashed text-sm transition-all flex items-center justify-center gap-2 ${
+          className={`w-full py-8 rounded-xl border border-dashed text-sm transition-all flex flex-col items-center justify-center gap-2 ${
             isImprove
               ? "border-amber-500/30 hover:border-amber-500/60 text-[#64748B] hover:text-amber-300"
               : "border-white/20 hover:border-emerald-500/40 text-[#64748B] hover:text-white"
           }`}
         >
-          <Upload className="w-4 h-4" />
-          Choose PDF or .txt file
+          <Upload className="w-6 h-6" />
+          <span>Choose PDF or .txt file</span>
+          {pasteText && <span className="text-xs text-green-400 mt-1">✓ File loaded — ready to {isImprove ? "boost" : "parse"}</span>}
         </button>
-      </div>
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-xs text-[#475569]">or paste text</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-[#94A3B8] mb-2">Paste your resume text</label>
-        <textarea
-          value={pasteText}
-          onChange={(e) => setPasteText(e.target.value)}
-          placeholder="Paste your resume content here..."
-          className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
-        />
       </div>
     </motion.div>
   );
@@ -196,13 +183,13 @@ export default function NewResumePage() {
             {step === "select"        ? "Create a new resume" :
              step === "ai-questions"  ? "Tell AI about yourself" :
              step === "improve-upload"? "AI Resume Boost" :
-             "Paste or upload your resume"}
+             "Upload your resume"}
           </h1>
           <p className="text-[#94A3B8] text-sm">
             {step === "select"        ? "How would you like to get started?" :
              step === "ai-questions"  ? "Answer a few quick questions and AI will craft your resume" :
              step === "improve-upload"? "Upload your existing CV — AI will rewrite it to be more impactful" :
-             "Upload a PDF / .txt file or paste your resume text below"}
+             "Upload your PDF or .txt file and AI will parse it into the builder"}
           </p>
         </motion.div>
 
