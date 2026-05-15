@@ -1,31 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useCredits } from "@/context/CreditsContext";
 
-export default function PaymentCallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const params = useSearchParams();
+  const { addCredits } = useCredits();
   const result  = params.get("result");
   const credits = Number(params.get("credits") ?? 0);
   const [status, setStatus] = useState<"loading" | "success" | "failure">("loading");
 
   useEffect(() => {
     if (result === "success" && credits > 0) {
-      // Add credits to localStorage
-      const current = Number(localStorage.getItem("cvdesignerai_credits") ?? 0);
-      localStorage.setItem("cvdesignerai_credits", String(current + credits));
-      setStatus("success");
-      setTimeout(() => router.push("/dashboard"), 2500);
+      addCredits(credits).then(() => {
+        setStatus("success");
+        setTimeout(() => router.push("/dashboard"), 2500);
+      });
     } else if (result === "failure") {
       setStatus("failure");
       setTimeout(() => router.push("/dashboard"), 3000);
-    } else {
-      setStatus("loading");
     }
-  }, [result, credits, router]);
+  }, [result, credits, router, addCredits]);
 
   return (
     <div className="min-h-screen bg-[#07070F] flex items-center justify-center">
@@ -41,7 +40,6 @@ export default function PaymentCallbackPage() {
             <p className="text-sm text-[#64748B]">Lütfen bekleyin</p>
           </>
         )}
-
         {status === "success" && (
           <>
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", duration: 0.5 }}>
@@ -54,7 +52,6 @@ export default function PaymentCallbackPage() {
             <p className="text-xs text-[#475569]">Dashboard&apos;a yönlendiriliyorsunuz...</p>
           </>
         )}
-
         {status === "failure" && (
           <>
             <XCircle className="w-14 h-14 text-red-400 mx-auto mb-4" />
@@ -67,5 +64,17 @@ export default function PaymentCallbackPage() {
         )}
       </motion.div>
     </div>
+  );
+}
+
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#07070F] flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
+      </div>
+    }>
+      <CallbackContent />
+    </Suspense>
   );
 }
