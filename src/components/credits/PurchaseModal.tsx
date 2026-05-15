@@ -119,8 +119,8 @@ export default function PurchaseModal() {
                   <Zap className="w-4.5 h-4.5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-base font-bold text-white">CV Kredisi Satın Al</p>
-                  <p className="text-xs text-[#64748B]">Her AI işlemi 1 kredi kullanır</p>
+                  <p className="text-base font-bold text-white">Buy CV Credits</p>
+                  <p className="text-xs text-[#64748B]">Each AI action uses 1 credit</p>
                 </div>
               </div>
               <button onClick={handleClose} className="p-1.5 rounded-lg text-[#64748B] hover:text-white hover:bg-white/5 transition-all">
@@ -131,7 +131,7 @@ export default function PurchaseModal() {
             {iyzipayForm ? (
               /* İyzico form embed */
               <div className="p-6">
-                <p className="text-sm text-[#94A3B8] mb-4 text-center">Güvenli ödeme sayfasına yönlendiriliyorsunuz...</p>
+                <p className="text-sm text-[#94A3B8] mb-4 text-center">Redirecting to secure payment page...</p>
                 <div id="iyzipay-form-container" className="min-h-[400px]" />
               </div>
             ) : (
@@ -167,13 +167,13 @@ export default function PurchaseModal() {
                         <div className="text-left">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-semibold text-white">
-                              {pkg.credits} CV Kredisi
+                              {pkg.credits} CV Credits
                             </p>
                             {pkg.savings && (
                               <span className="text-[10px] text-emerald-400 font-medium">{pkg.savings}</span>
                             )}
                           </div>
-                          <p className="text-xs text-[#64748B]">${pkg.pricePerCredit} / kredi</p>
+                          <p className="text-xs text-[#64748B]">${pkg.pricePerCredit} / credit</p>
                         </div>
                       </div>
 
@@ -198,17 +198,17 @@ export default function PurchaseModal() {
                   className="w-full btn-primary text-white font-semibold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mb-4"
                 >
                   {loading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />Yönlendiriliyor...</>
+                    <><Loader2 className="w-4 h-4 animate-spin" />Redirecting...</>
                   ) : (
-                    <><CreditCard className="w-4 h-4" />${selectedPkg.price} öde — {selectedPkg.credits} kredi kazan</>
+                    <><CreditCard className="w-4 h-4" />Pay ${selectedPkg.price} — Get {selectedPkg.credits} credits</>
                   )}
                 </button>
 
                 {/* Trust signals */}
                 <div className="flex items-center justify-center gap-4 text-xs text-[#475569]">
-                  <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />SSL Güvenli</span>
-                  <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-purple-400" />İyzico ile ödeme</span>
-                  <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-blue-400" />Anında aktif</span>
+                  <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />SSL Secure</span>
+                  <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-purple-400" />Powered by Iyzico</span>
+                  <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-blue-400" />Instant activation</span>
                 </div>
               </div>
             )}

@@ -36,8 +36,8 @@ function CallbackContent() {
         {status === "loading" && (
           <>
             <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-            <p className="text-white font-semibold mb-1">Ödeme doğrulanıyor...</p>
-            <p className="text-sm text-[#64748B]">Lütfen bekleyin</p>
+            <p className="text-white font-semibold mb-1">Verifying payment...</p>
+            <p className="text-sm text-[#64748B]">Please wait</p>
           </>
         )}
         {status === "success" && (
@@ -45,21 +45,21 @@ function CallbackContent() {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", duration: 0.5 }}>
               <CheckCircle className="w-14 h-14 text-green-400 mx-auto mb-4" />
             </motion.div>
-            <p className="text-xl font-bold text-white mb-2">Ödeme Başarılı!</p>
+            <p className="text-xl font-bold text-white mb-2">Payment Successful!</p>
             <p className="text-[#94A3B8] text-sm mb-4">
-              <span className="text-white font-semibold">{credits} CV kredisi</span> hesabına eklendi.
+              <span className="text-white font-semibold">{credits} CV credits</span> have been added to your account.
             </p>
-            <p className="text-xs text-[#475569]">Dashboard&apos;a yönlendiriliyorsunuz...</p>
+            <p className="text-xs text-[#475569]">Redirecting to dashboard...</p>
           </>
         )}
         {status === "failure" && (
           <>
             <XCircle className="w-14 h-14 text-red-400 mx-auto mb-4" />
-            <p className="text-xl font-bold text-white mb-2">Ödeme Başarısız</p>
+            <p className="text-xl font-bold text-white mb-2">Payment Failed</p>
             <p className="text-[#94A3B8] text-sm mb-4">
-              Ödeme tamamlanamadı. Kredi kartı bilgilerini kontrol edip tekrar deneyin.
+              Payment could not be completed. Please check your card details and try again.
             </p>
-            <p className="text-xs text-[#475569]">Dashboard&apos;a yönlendiriliyorsunuz...</p>
+            <p className="text-xs text-[#475569]">Redirecting to dashboard...</p>
           </>
         )}
       </motion.div>

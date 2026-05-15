@@ -70,14 +70,14 @@ export default function NewResumePage() {
 
     // Parse with AI (linkedin or upload paste step)
     if (!pasteText.trim()) {
-      setError("Lütfen metin girin.");
+      setError("Please enter some text.");
       return;
     }
 
     const trimmed = pasteText.trim();
     const looksLikeUrl = /^https?:\/\/\S+$/.test(trimmed);
     if (looksLikeUrl) {
-      setError("Profil linki değil, LinkedIn PDF'inden kopyaladığın metni yapıştır. LinkedIn profiline git → Daha fazla → PDF olarak kaydet → PDF'i aç → Ctrl+A ile tümünü seç → kopyala → buraya yapıştır.");
+      setError("Please paste the text from your LinkedIn PDF — not the profile URL. Go to LinkedIn → More → Save to PDF → open the PDF → Ctrl+A → copy → paste here.");
       return;
     }
 
@@ -93,7 +93,7 @@ export default function NewResumePage() {
       await goToBuilder(formData);
     } catch {
       setLoading(false);
-      setError("AI parse edilemedi. Lütfen tekrar dene.");
+      setError("Failed to parse resume. Please try again.");
     }
   };
 
@@ -198,13 +198,13 @@ export default function NewResumePage() {
               <div className="flex items-start gap-3 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20">
                 <CheckCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-sky-300">
-                  LinkedIn profiline git → <strong>More</strong> → <strong>Save to PDF</strong> → PDF&apos;i aç → tüm metni seç (Ctrl+A) → kopyala → buraya yapıştır.
+                  Go to your LinkedIn profile → <strong>More</strong> → <strong>Save to PDF</strong> → open the PDF → select all (Ctrl+A) → copy → paste here.
                 </p>
               </div>
               <textarea
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder="LinkedIn profil metninizi buraya yapıştırın..."
+                placeholder="Paste your LinkedIn profile text here..."
                 className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
               />
             </motion.div>
@@ -214,27 +214,27 @@ export default function NewResumePage() {
           {step === "upload-paste" && (
             <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card rounded-2xl p-6 mb-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Dosya yükle (.txt)</label>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Upload file (.txt)</label>
                 <input ref={fileRef} type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
                 <button
                   onClick={() => fileRef.current?.click()}
                   className="w-full py-3 rounded-xl border border-dashed border-white/20 hover:border-emerald-500/40 text-sm text-[#64748B] hover:text-white transition-all flex items-center justify-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  Dosya seç (.txt)
+                  Choose file (.txt)
                 </button>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-white/10" />
-                <span className="text-xs text-[#475569]">veya</span>
+                <span className="text-xs text-[#475569]">or</span>
                 <div className="flex-1 h-px bg-white/10" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">CV metninizi yapıştırın</label>
+                <label className="block text-sm font-medium text-[#94A3B8] mb-2">Paste your resume text</label>
                 <textarea
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
-                  placeholder="CV içeriğinizi buraya yapıştırın..."
+                  placeholder="Paste your resume content here..."
                   className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-48"
                 />
               </div>

@@ -130,14 +130,14 @@ export default function Sidebar() {
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-xs font-medium text-[#94A3B8]">AI Credits</span>
               </div>
-              <span className="text-xs text-[#64748B]">{credits} kalan</span>
+              <span className="text-xs text-[#64748B]">{credits} remaining</span>
             </div>
             <button
               onClick={openPurchase}
               className="mt-1 w-full text-xs bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 hover:text-purple-200 transition-colors flex items-center justify-center gap-1.5 py-1.5 rounded-lg"
             >
               <Zap className="w-3 h-3" />
-              Kredi Satın Al
+              Buy Credits
             </button>
           </div>
 
