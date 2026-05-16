@@ -233,7 +233,7 @@ body {
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-  @page { margin: 0.4in; size: A4; }
+  @page { margin: 0; size: A4; }
 }
 
 /* Pricing card highlight */

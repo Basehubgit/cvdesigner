@@ -484,6 +484,8 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                 {formData.email && <span>{formData.email}</span>}
                 {formData.phone && <><span>•</span><span>{formData.phone}</span></>}
                 {formData.location && <><span>•</span><span>{formData.location}</span></>}
+                {formData.linkedin && <><span>•</span><span>{formData.linkedin}</span></>}
+                {formData.website && <><span>•</span><span>{formData.website}</span></>}
               </div>
             </div>
 
