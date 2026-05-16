@@ -3,13 +3,12 @@
 import { useState, useEffect, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FileText, Sparkles, Download, Eye, ChevronLeft,
-  Plus, Trash2, GripVertical, Wand2, LayoutTemplate,
+  FileText, Download, Eye, ChevronLeft,
+  Plus, Trash2, GripVertical, LayoutTemplate,
   Globe, Settings, ChevronDown, ChevronRight,
   Briefcase, GraduationCap, Code, Award, User, EyeOff,
 } from "lucide-react";
 import Link from "next/link";
-import { useCredits } from "@/context/CreditsContext";
 import { useResumes } from "@/context/ResumesContext";
 import { calcAtsScore } from "@/lib/ats";
 
@@ -58,9 +57,6 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   const [activeTemplate, setActiveTemplate] = useState("modern");
   const [showTemplates, setShowTemplates]   = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
-  const [aiImproving, setAiImproving]             = useState(false);
-  const [aiSuggestingSkills, setAiSuggestingSkills] = useState(false);
-  const [aiImprovingExp, setAiImprovingExp]         = useState<number | null>(null);
   const [previewMode, setPreviewMode]       = useState(false);
   const [newSkill, setNewSkill]             = useState("");
   const [saved, setSaved]                   = useState(false);
@@ -92,63 +88,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [formData, activeTemplate, id, saveResume]);
 
-  const { deductCredit, openPurchase } = useCredits();
   const template = TEMPLATES.find((t) => t.id === activeTemplate) ?? TEMPLATES[0];
-
-  const callAI = async (message: string, type: string): Promise<string> => {
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, type }),
-    });
-    if (!res.ok) throw new Error("API error");
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-    let result = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      result += decoder.decode(value, { stream: true });
-    }
-    return result.trim();
-  };
-
-  const handleAiImprove = async () => {
-    if (!(await deductCredit())) { openPurchase(); return; }
-    setAiImproving(true);
-    try {
-      const improved = await callAI(
-        `Improve this professional summary for a ${formData.title}:\n\n${formData.summary}`,
-        "improve_summary"
-      );
-      setFormData((prev) => ({ ...prev, summary: improved }));
-    } catch {
-      // silent
-    } finally {
-      setAiImproving(false);
-    }
-  };
-
-  const handleAiSuggestSkills = async () => {
-    if (!(await deductCredit())) { openPurchase(); return; }
-    setAiSuggestingSkills(true);
-    try {
-      const result = await callAI(
-        `Job title: ${formData.title}. Current skills: ${formData.skills.join(", ")}. Suggest 5 additional relevant skills.`,
-        "suggest_skills"
-      );
-      const newSkills = result
-        .split(",")
-        .map((s) => s.trim().replace(/^[-•*]\s*/, ""))
-        .filter((s) => s && !formData.skills.includes(s))
-        .slice(0, 5);
-      setFormData((prev) => ({ ...prev, skills: [...prev.skills, ...newSkills] }));
-    } catch {
-      // fallback silently
-    } finally {
-      setAiSuggestingSkills(false);
-    }
-  };
 
   const updateExp = (i: number, field: keyof ExpItem, value: string) => {
     const updated = [...formData.experience];
@@ -242,18 +182,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
         </nav>
 
         {/* Bottom actions */}
-        <div className="p-3 border-t border-white/5 space-y-2">
-          <button
-            onClick={handleAiImprove}
-            disabled={aiImproving}
-            className="w-full flex items-center justify-center gap-2 btn-primary py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
-          >
-            {aiImproving ? (
-              <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Improving...</>
-            ) : (
-              <><Wand2 className="w-3.5 h-3.5" />AI Improve All</>
-            )}
-          </button>
+        <div className="p-3 border-t border-white/5">
           <button
             onClick={() => window.print()}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs text-[#64748B] hover:text-white border border-white/8 hover:bg-white/5 transition-all"
@@ -339,22 +268,12 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
               {activeSection === "summary" && (
                 <motion.div key="summary" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
                   <SectionHeader title="Professional Summary" icon={FileText} />
-                  <div className="relative">
-                    <textarea
-                      className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-36"
-                      value={formData.summary}
-                      onChange={(e) => setFormData((p) => ({ ...p, summary: e.target.value }))}
-                      placeholder="Write a compelling professional summary..."
-                    />
-                    <button
-                      onClick={handleAiImprove}
-                      disabled={aiImproving}
-                      className="absolute bottom-3 right-3 btn-primary text-xs font-medium text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 disabled:opacity-60"
-                    >
-                      {aiImproving ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                      AI Improve
-                    </button>
-                  </div>
+                  <textarea
+                    className="w-full input-dark rounded-xl px-4 py-3 text-sm resize-none min-h-36"
+                    value={formData.summary}
+                    onChange={(e) => setFormData((p) => ({ ...p, summary: e.target.value }))}
+                    placeholder="Write a compelling professional summary..."
+                  />
                   <p className="text-xs text-[#64748B]">Tip: A strong summary is 2-4 sentences highlighting your years of experience, specialization, and key achievements.</p>
                 </motion.div>
               )}
@@ -389,36 +308,11 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                         </FieldGroup>
                       </div>
                       <FieldGroup label="Description">
-                        <div className="relative">
-                          <textarea
-                            className="w-full input-dark rounded-xl px-3 py-2.5 text-sm resize-none min-h-24"
-                            value={exp.description}
-                            onChange={(e) => updateExp(i, "description", e.target.value)}
-                          />
-                          <button
-                            disabled={aiImprovingExp === i}
-                            onClick={async () => {
-                              if (!exp.description.trim()) return;
-                              if (!(await deductCredit())) { openPurchase(); return; }
-                              setAiImprovingExp(i);
-                              try {
-                                const improved = await callAI(
-                                  `Role: ${exp.role} at ${exp.company}.\n\nImprove this description:\n${exp.description}`,
-                                  "improve_bullet"
-                                );
-                                updateExp(i, "description", improved);
-                              } catch { /* silent */ } finally {
-                                setAiImprovingExp(null);
-                              }
-                            }}
-                            className="absolute bottom-2 right-2 btn-primary text-xs text-white px-2.5 py-1 rounded-lg flex items-center gap-1 disabled:opacity-60"
-                          >
-                            {aiImprovingExp === i
-                              ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              : <Sparkles className="w-3 h-3" />}
-                            AI
-                          </button>
-                        </div>
+                        <textarea
+                          className="w-full input-dark rounded-xl px-3 py-2.5 text-sm resize-none min-h-24"
+                          value={exp.description}
+                          onChange={(e) => updateExp(i, "description", e.target.value)}
+                        />
                       </FieldGroup>
                     </div>
                   ))}
@@ -497,12 +391,10 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
                     />
                     <button
-                      onClick={handleAiSuggestSkills}
-                      disabled={aiSuggestingSkills}
-                      className="btn-primary text-white px-4 rounded-xl text-sm font-medium flex items-center gap-1.5 disabled:opacity-60"
+                      onClick={addSkill}
+                      className="btn-primary text-white px-4 rounded-xl text-sm font-medium"
                     >
-                      {aiSuggestingSkills ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      AI Suggest
+                      Add
                     </button>
                   </div>
                   <p className="text-xs text-[#64748B]">Press Enter to add a skill, or click AI Suggest to auto-fill based on your job title.</p>
