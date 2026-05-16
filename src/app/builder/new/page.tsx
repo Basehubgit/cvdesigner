@@ -76,17 +76,25 @@ if (selected === "upload" && step === "select") { setStep("upload-paste"); retur
     setLoadingMsg(selected === "improve" ? "AI is boosting your resume..." : "AI Parsing...");
 
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 55000);
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: pasteText }),
+        signal: controller.signal,
       });
+      clearTimeout(timer);
       if (!res.ok) throw new Error("Failed");
-      const formData = await res.json();
-      await goToBuilder(formData);
-    } catch {
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      await goToBuilder(data);
+    } catch (err) {
       setLoading(false);
-      setError("Something went wrong. Please try again.");
+      const isTimeout = err instanceof Error && err.name === "AbortError";
+      setError(isTimeout
+        ? "AI took too long. Please try again."
+        : "Something went wrong. Please try again.");
     }
   };
 

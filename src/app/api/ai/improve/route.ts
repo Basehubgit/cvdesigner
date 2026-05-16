@@ -2,6 +2,8 @@ import Replicate from "replicate";
 import { NextRequest, NextResponse } from "next/server";
 import { extractJsonObject, normalizeResumeData, REPLICATE_MODEL, replicateEventToText } from "@/lib/ai";
 
+export const maxDuration = 60;
+
 const SYSTEM_PROMPT = `You are an expert resume writer and career coach. You will receive resume text.
 Your job is to:
 1. Parse all information from the resume

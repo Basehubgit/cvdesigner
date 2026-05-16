@@ -2,6 +2,8 @@ import Replicate from "replicate";
 import { NextRequest, NextResponse } from "next/server";
 import { extractJsonObject, normalizeResumeData, REPLICATE_MODEL, replicateEventToText } from "@/lib/ai";
 
+export const maxDuration = 60;
+
 const SYSTEM_PROMPT = `You are a resume parser. Extract structured data from the given resume or LinkedIn profile text.
 Return ONLY a valid JSON object with this exact structure (no markdown, no explanation, just JSON):
 {
