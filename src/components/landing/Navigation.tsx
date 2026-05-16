@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { FileText, Menu, X, Sparkles } from "lucide-react";
+import { FileText, Menu, X, Sparkles, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -15,6 +16,7 @@ const navLinks = [
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -60,19 +62,31 @@ export default function Navigation() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/auth/login"
-              className="text-sm text-[#94A3B8] hover:text-white transition-colors px-4 py-2"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="btn-primary text-sm font-medium text-white px-5 py-2 rounded-lg flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Get Started
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="btn-primary text-sm font-medium text-white px-5 py-2 rounded-lg flex items-center gap-2"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-sm text-[#94A3B8] hover:text-white transition-colors px-4 py-2"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="btn-primary text-sm font-medium text-white px-5 py-2 rounded-lg flex items-center gap-2"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -106,18 +120,30 @@ export default function Navigation() {
                 </Link>
               ))}
               <div className="pt-2 border-t border-white/5 mt-2 space-y-2">
-                <Link
-                  href="/auth/login"
-                  className="block px-4 py-3 text-sm text-[#94A3B8] hover:text-white rounded-lg"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="block btn-primary text-sm font-medium text-white px-4 py-3 rounded-lg text-center"
-                >
-                  Get Started
-                </Link>
+                {user ? (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="block btn-primary text-sm font-medium text-white px-4 py-3 rounded-lg text-center"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="block px-4 py-3 text-sm text-[#94A3B8] hover:text-white rounded-lg"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="block btn-primary text-sm font-medium text-white px-4 py-3 rounded-lg text-center"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

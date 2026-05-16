@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { FileText, ArrowRight, ArrowLeft, Mail, Check, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -15,13 +16,15 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
 
-    const account = localStorage.getItem(`cvdesignerai_account_${email}`);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://www.cvdesigner.pro/auth/reset-password",
+    });
+
     setLoading(false);
 
-    if (!account) {
-      setError("No account found with this email address.");
+    if (error) {
+      setError(error.message);
       return;
     }
 
@@ -44,7 +47,7 @@ export default function ForgotPasswordPage() {
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">Reset your password</h1>
-          <p className="text-[#94A3B8] text-sm">Enter your email and we&apos;ll verify your account</p>
+          <p className="text-[#94A3B8] text-sm">Enter your email and we&apos;ll send you a reset link</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-8 border border-white/8">
@@ -53,12 +56,11 @@ export default function ForgotPasswordPage() {
               <div className="w-14 h-14 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center mx-auto mb-4">
                 <Check className="w-7 h-7 text-green-400" />
               </div>
-              <p className="text-white font-semibold mb-2">Account verified!</p>
-              <p className="text-sm text-[#64748B] mb-2">
-                We found an account for <span className="text-[#94A3B8]">{email}</span>.
-              </p>
-              <p className="text-xs text-[#475569] mb-6">
-                Since this is a demo app, please use the login page and try your existing password, or create a new account.
+              <p className="text-white font-semibold mb-2">Email sent!</p>
+              <p className="text-sm text-[#64748B] mb-6">
+                We sent a password reset link to{" "}
+                <span className="text-[#94A3B8]">{email}</span>.<br />
+                Check your inbox and follow the instructions.
               </p>
               <Link href="/auth/login" className="text-sm text-purple-400 hover:text-purple-300 flex items-center justify-center gap-1.5 transition-colors">
                 <ArrowLeft className="w-4 h-4" /> Back to sign in
@@ -92,8 +94,8 @@ export default function ForgotPasswordPage() {
                 className="w-full btn-primary text-white font-semibold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading
-                  ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Verifying...</>
-                  : <>Verify Account <ArrowRight className="w-4 h-4" /></>
+                  ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Sending...</>
+                  : <>Send Reset Link <ArrowRight className="w-4 h-4" /></>
                 }
               </button>
 

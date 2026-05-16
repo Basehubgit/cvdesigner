@@ -1,10 +1,10 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Eye, EyeOff, Sparkles, ArrowRight, Code2, Globe, Check, AlertCircle } from "lucide-react";
+import { FileText, Eye, EyeOff, Sparkles, ArrowRight, Globe, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -22,11 +22,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [socialToast, setSocialToast] = useState<string | null>(null);
 
-  const handleSocialLogin = (provider: string) => {
-    setSocialToast(`${provider} login coming soon!`);
-    setTimeout(() => setSocialToast(null), 2500);
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://www.cvdesigner.pro/dashboard" },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,12 +69,9 @@ export default function LoginPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-8 border border-white/8">
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <button onClick={() => handleSocialLogin("Google")} className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-[#94A3B8] hover:text-white">
-              <Globe className="w-4 h-4" /> Google
-            </button>
-            <button onClick={() => handleSocialLogin("GitHub")} className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-[#94A3B8] hover:text-white">
-              <Code2 className="w-4 h-4" /> GitHub
+          <div className="mb-6">
+            <button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-[#94A3B8] hover:text-white">
+              <Globe className="w-4 h-4" /> Continue with Google
             </button>
           </div>
 
@@ -125,13 +123,6 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      <AnimatePresence>
-        {socialToast && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-3 rounded-xl bg-[#1a1a2e] border border-white/10 shadow-xl text-sm text-white z-50">
-            <Check className="w-4 h-4 text-purple-400" /> {socialToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

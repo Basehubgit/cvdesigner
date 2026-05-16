@@ -222,6 +222,7 @@ body {
 /* Print styles — only show resume preview panel */
 @media print {
   body * { visibility: hidden !important; }
+  .print-panel { display: flex !important; }
   .print-resume, .print-resume * { visibility: visible !important; }
   .print-resume {
     position: fixed !important;

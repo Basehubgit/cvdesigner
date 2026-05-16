@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: "How does the credit system work?",
-    a: "Each AI generation or resume improvement costs 1 credit. You buy credits in packs — 1, 5, or 15 at a time. Credits never expire, so you can use them at your own pace. New accounts get 3 free credits to try the platform.",
+    a: "Each AI generation or resume improvement costs 1 credit. You buy credits in packs — 1, 5, or 15 at a time. Credits never expire, so you can use them at your own pace.",
   },
   {
     q: "Do credits expire?",

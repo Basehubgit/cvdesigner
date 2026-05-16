@@ -92,7 +92,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [formData, activeTemplate, id, saveResume]);
 
-  const { deductCredit } = useCredits();
+  const { deductCredit, openPurchase } = useCredits();
   const template = TEMPLATES.find((t) => t.id === activeTemplate) ?? TEMPLATES[0];
 
   const callAI = async (message: string, type: string): Promise<string> => {
@@ -114,7 +114,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   };
 
   const handleAiImprove = async () => {
-    if (!(await deductCredit())) return;
+    if (!(await deductCredit())) { openPurchase(); return; }
     setAiImproving(true);
     try {
       const improved = await callAI(
@@ -123,14 +123,14 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
       );
       setFormData((prev) => ({ ...prev, summary: improved }));
     } catch {
-      // fallback: keep existing summary
+      // silent
     } finally {
       setAiImproving(false);
     }
   };
 
   const handleAiSuggestSkills = async () => {
-    if (!(await deductCredit())) return;
+    if (!(await deductCredit())) { openPurchase(); return; }
     setAiSuggestingSkills(true);
     try {
       const result = await callAI(
@@ -399,7 +399,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                             disabled={aiImprovingExp === i}
                             onClick={async () => {
                               if (!exp.description.trim()) return;
-                              if (!(await deductCredit())) return;
+                              if (!(await deductCredit())) { openPurchase(); return; }
                               setAiImprovingExp(i);
                               try {
                                 const improved = await callAI(
@@ -557,7 +557,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* Right — Live Preview */}
-      <div className={`${showMobilePreview ? "fixed inset-0 z-50 lg:relative lg:inset-auto" : "hidden lg:flex"} w-full lg:w-[420px] bg-[#0A0A15] border-l border-white/5 flex-col shrink-0`}>
+      <div className={`print-panel ${showMobilePreview ? "fixed inset-0 z-50 lg:relative lg:inset-auto" : "hidden lg:flex"} w-full lg:w-[420px] bg-[#0A0A15] border-l border-white/5 flex-col shrink-0`}>
         <div className="h-14 border-b border-white/5 flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-2">
             <Eye className="w-3.5 h-3.5 text-purple-400" />

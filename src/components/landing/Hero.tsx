@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Sparkles, ArrowRight, Play, CheckCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const highlights = [
   "ATS-Optimized",
@@ -35,6 +36,8 @@ const resumePreview = {
 };
 
 export default function Hero() {
+  const { user } = useAuth();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background effects */}
@@ -109,11 +112,11 @@ export default function Hero() {
               className="flex flex-col sm:flex-row gap-4 mb-12"
             >
               <Link
-                href="/auth/signup"
+                href={user ? "/dashboard" : "/auth/signup"}
                 className="btn-primary inline-flex items-center justify-center gap-2.5 text-white font-semibold px-8 py-4 rounded-xl text-base group"
               >
                 <Sparkles className="w-4 h-4" />
-                Create CV
+                {user ? "Go to Dashboard" : "Create CV"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <button
