@@ -221,10 +221,18 @@ body {
 
 /* Print styles — only show resume preview panel */
 @media print {
-  body > * { display: none !important; }
-  .print-resume { display: block !important; }
-  .print-resume * { display: revert !important; }
-  @page { margin: 0.5in; size: A4; }
+  body * { visibility: hidden !important; }
+  .print-resume, .print-resume * { visibility: visible !important; }
+  .print-resume {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  @page { margin: 0.4in; size: A4; }
 }
 
 /* Pricing card highlight */

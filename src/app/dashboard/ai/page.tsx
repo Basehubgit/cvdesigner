@@ -102,7 +102,7 @@ export default function AIAssistantPage() {
 
   const reset = () => {
     abortRef.current?.abort();
-    setMessages([{ role: "ai", text: "Hi! I'm your AI resume assistant powered by Llama 3.1 70B. I can help you write stronger bullet points, improve your summary, optimize for ATS, and more. What would you like to work on?" }]);
+    setMessages([{ role: "ai", text: "Hi! I'm your AI resume assistant. I can help you write stronger bullet points, improve your summary, optimize for ATS, and more. What would you like to work on?" }]);
     setInput("");
     setError(null);
     setLoading(false);
@@ -120,7 +120,7 @@ export default function AIAssistantPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">AI Assistant</h1>
-              <p className="text-xs text-[#64748B]">Llama 3.1 70B via Replicate</p>
+              <p className="text-xs text-[#64748B]">Llama 3 70B via Replicate</p>
             </div>
           </div>
           <button
