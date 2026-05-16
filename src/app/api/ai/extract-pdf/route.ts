@@ -11,30 +11,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const buffer = await file.arrayBuffer();
+    const { extractText } = await import("unpdf");
+    const { text } = await extractText(buffer, { mergePages: true });
 
-    const pdfjsLib = await import("pdfjs-dist");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-
-    const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(buffer),
-      useSystemFonts: true,
-      disableFontFace: true,
-    });
-    const doc = await loadingTask.promise;
-
-    const pages: string[] = [];
-    for (let i = 1; i <= doc.numPages; i++) {
-      const page = await doc.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items
-        .filter((item) => "str" in item)
-        .map((item) => (item as { str: string }).str)
-        .join(" ");
-      pages.push(pageText);
-    }
-
-    return NextResponse.json({ text: pages.join("\n\n") });
+    return NextResponse.json({ text });
   } catch (err) {
     console.error("PDF extraction error:", err);
     return NextResponse.json({ error: "Failed to extract PDF text" }, { status: 500 });
