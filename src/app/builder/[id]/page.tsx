@@ -6,13 +6,13 @@ import {
   FileText, Download, Eye, ChevronLeft,
   Plus, Trash2, GripVertical, LayoutTemplate,
   Globe, Settings, ChevronDown, ChevronRight,
-  Briefcase, GraduationCap, Code, Award, User, EyeOff,
+  Briefcase, GraduationCap, Code, Award, User, EyeOff, Languages,
 } from "lucide-react";
 import Link from "next/link";
 import { useResumes } from "@/context/ResumesContext";
 import { calcAtsScore } from "@/lib/ats";
 
-type Section = "personal" | "summary" | "experience" | "education" | "skills" | "certifications";
+type Section = "personal" | "summary" | "experience" | "education" | "skills" | "certifications" | "languages";
 
 const SECTIONS: { id: Section; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "personal", label: "Personal Info", icon: User },
@@ -21,6 +21,7 @@ const SECTIONS: { id: Section; label: string; icon: React.ComponentType<{ classN
   { id: "education", label: "Education", icon: GraduationCap },
   { id: "skills", label: "Skills", icon: Code },
   { id: "certifications", label: "Certifications", icon: Award },
+  { id: "languages", label: "Languages", icon: Languages },
 ];
 
 const TEMPLATES = [
@@ -34,10 +35,14 @@ const TEMPLATES = [
 type EducationItem = { id: string; degree: string; institution: string; year: string; gpa: string };
 type CertItem     = { id: string; name: string; org: string; year: string; credentialId: string };
 type ExpItem      = { id: string; role: string; company: string; location: string; period: string; description: string };
+type LangItem     = { id: string; language: string; level: string };
 
 function mkEdu(): EducationItem { return { id: String(Date.now()), degree: "", institution: "", year: "", gpa: "" }; }
 function mkCert(): CertItem     { return { id: String(Date.now()), name: "", org: "", year: "", credentialId: "" }; }
 function mkExp(): ExpItem       { return { id: String(Date.now()), role: "", company: "", location: "", period: "", description: "" }; }
+function mkLang(): LangItem     { return { id: String(Date.now()), language: "", level: "Intermediate" }; }
+
+const LANG_LEVELS = ["Beginner", "Intermediate", "Advanced", "Fluent"];
 
 const EMPTY_FORM = {
   name: "", title: "", email: "", phone: "", location: "", linkedin: "", website: "",
@@ -46,6 +51,7 @@ const EMPTY_FORM = {
   experience: [] as ExpItem[],
   education: [] as EducationItem[],
   certifications: [] as CertItem[],
+  languages: [] as LangItem[],
 };
 
 export default function BuilderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -106,6 +112,12 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
     const updated = [...formData.certifications];
     updated[i] = { ...updated[i], [field]: value };
     setFormData((p) => ({ ...p, certifications: updated }));
+  };
+
+  const updateLang = (i: number, field: keyof LangItem, value: string) => {
+    const updated = [...formData.languages];
+    updated[i] = { ...updated[i], [field]: value };
+    setFormData((p) => ({ ...p, languages: updated }));
   };
 
   const addSkill = () => {
@@ -443,6 +455,51 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                   </button>
                 </motion.div>
               )}
+
+              {/* Languages */}
+              {activeSection === "languages" && (
+                <motion.div key="languages" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+                  <SectionHeader title="Languages" icon={Languages} />
+                  {formData.languages.length === 0 && (
+                    <p className="text-xs text-[#64748B] text-center py-4">No languages yet. Add one below.</p>
+                  )}
+                  {formData.languages.map((lang, i) => (
+                    <div key={lang.id} className="glass-card rounded-xl p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium text-[#64748B]">Language {i + 1}</span>
+                        <button
+                          onClick={() => setFormData((p) => ({ ...p, languages: p.languages.filter((_, si) => si !== i) }))}
+                          className="text-[#475569] hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <FieldGroup label="Language">
+                          <input className="w-full input-dark rounded-xl px-3 py-2.5 text-sm" value={lang.language} onChange={(e) => updateLang(i, "language", e.target.value)} placeholder="English" />
+                        </FieldGroup>
+                        <FieldGroup label="Level">
+                          <select
+                            className="w-full input-dark rounded-xl px-3 py-2.5 text-sm"
+                            value={lang.level}
+                            onChange={(e) => updateLang(i, "level", e.target.value)}
+                          >
+                            {LANG_LEVELS.map((lvl) => (
+                              <option key={lvl} value={lvl}>{lvl}</option>
+                            ))}
+                          </select>
+                        </FieldGroup>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 hover:border-purple-500/30 text-xs text-[#64748B] hover:text-purple-400 transition-all"
+                    onClick={() => setFormData((p) => ({ ...p, languages: [...p.languages, mkLang()] }))}
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Language
+                  </button>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </div>
@@ -561,6 +618,20 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
                           <p className="text-[10px] text-slate-500">{cert.org}</p>
                         </div>
                         <span className="text-[10px] text-slate-400">{cert.year}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {formData.languages.length > 0 && (
+                <div>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: template.accent }}>Languages</h3>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {formData.languages.map((lang) => (
+                      <div key={lang.id} className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-bold text-slate-800">{lang.language}</span>
+                        <span className="text-[10px] text-slate-400">— {lang.level}</span>
                       </div>
                     ))}
                   </div>
