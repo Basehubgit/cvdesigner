@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
       const page = await doc.getPage(i);
       const content = await page.getTextContent();
       const pageText = content.items
-        .filter((item): item is { str: string } => "str" in item)
-        .map((item) => item.str)
+        .filter((item) => "str" in item)
+        .map((item) => (item as { str: string }).str)
         .join(" ");
       pages.push(pageText);
     }
